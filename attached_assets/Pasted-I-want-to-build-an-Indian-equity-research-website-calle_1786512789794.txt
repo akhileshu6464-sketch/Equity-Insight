@@ -1,0 +1,451 @@
+I want to build an Indian equity research website called "StockLens" (the name can be changed later).
+
+IMPORTANT:
+I am not a software developer, so build everything for me. Do not ask me to write code. Make reasonable technical decisions yourself.
+
+PRODUCT IDEA:
+This is NOT a stock screener and NOT a chatbot.
+
+The user simply searches for a company, for example "Reliance Industries", and immediately gets a comprehensive, easy-to-understand equity research report.
+
+The goal is:
+"Search a company. Understand everything that matters."
+
+The website should explain complex company research in simple language for normal investors. It should not use unnecessary professional equity-research jargon.
+
+For the first prototype, ONLY build the frontend and use realistic SAMPLE DATA for Reliance Industries. Do NOT connect external APIs or AI yet. We will add the database and AI later.
+
+CREATE THESE PAGES:
+
+1. HOME PAGE
+
+A clean, modern landing page.
+
+Headline:
+"Understand any company before you invest."
+
+Subheadline:
+"Search a stock and get the business, financials, cash flow, risks, management commentary, news and deeper research explained in simple language."
+
+Large search box:
+"Search company name or stock symbol"
+
+Example:
+"Reliance Industries"
+"Ashoka Buildcon"
+"NCC"
+"SRF"
+
+Below the search box show:
+"Try Reliance Industries"
+
+When the user searches Reliance, take them to the Reliance research page.
+
+2. COMPANY RESEARCH PAGE
+
+Create a professional research dashboard for:
+
+RELIANCE INDUSTRIES
+
+Show:
+
+Company name
+Ticker: RELIANCE
+Sector
+Market cap
+Current price
+Last updated
+
+Then create these sections:
+
+A. COMPANY IN SIMPLE WORDS
+
+Heading:
+"What does Reliance actually do?"
+
+Give a simple explanation of the business.
+
+Also show:
+"How does Reliance make money?"
+
+Explain its major business segments in simple language.
+
+B. BUSINESS BREAKDOWN
+
+Show major segments such as:
+
+Oil to Chemicals
+Digital Services / Jio
+Retail
+New Energy
+Other businesses
+
+Use simple cards showing:
+Business
+What it does
+How it makes money
+Importance to the company
+
+C. FINANCIAL PERFORMANCE
+
+Do NOT simply display financial statements.
+
+Show simple indicators:
+
+Revenue
+EBITDA
+EBITDA margin
+PAT
+EPS
+ROCE
+Debt
+Free cash flow
+
+Use simple trend indicators.
+
+Then show:
+
+"What's happening?"
+
+Give a plain-English explanation of the financial trend.
+
+D. WHY DID EARNINGS CHANGE?
+
+Create a prominent research card:
+
+"Why did earnings change?"
+
+Explain the fictional/sample Reliance earnings movement using sample data.
+
+Break the explanation into:
+
+Revenue
+Margins
+Segment performance
+Costs
+One-off factors
+
+Then show:
+
+"Why does this matter?"
+
+with a simple explanation.
+
+E. CASH FLOW
+
+Heading:
+"Where is the company's cash going?"
+
+Show:
+
+Profit
+Operating cash flow
+Capex
+Free cash flow
+
+Then create:
+
+"Why is cash flow different from profit?"
+
+Explain the relationship between profit and cash generation.
+
+F. BALANCE SHEET HEALTH
+
+Show:
+
+Debt
+Cash
+Receivables
+Inventory
+Payables
+
+Then create:
+
+"What changed?"
+
+and:
+
+"Is anything unusual?"
+
+G. CROSS-STATEMENT ANALYSIS
+
+This is a CORE feature of the product.
+
+Create a section called:
+
+"Does the financial story actually make sense?"
+
+Show examples of relationships such as:
+
+Revenue vs Receivables
+Profit vs Operating Cash Flow
+Inventory vs Revenue
+Debt vs EBITDA
+Capex vs Cash Flow
+
+For each one display:
+
+Finding
+Why it matters
+Risk level
+
+Use labels:
+LOW
+WATCH
+HIGH
+
+Make it clear that these are analytical observations, not accusations of wrongdoing.
+
+H. RED FLAGS
+
+Create a section:
+
+"Things investors should watch"
+
+Show 4-6 sample findings.
+
+Each finding should contain:
+
+Risk title
+What happened
+Why it matters
+Risk level
+
+Use simple language.
+
+I. MANAGEMENT & GUIDANCE
+
+Show:
+
+"What is management saying?"
+
+Include sample management commentary.
+
+Then:
+
+"Did management deliver on previous promises?"
+
+Create a table:
+
+Management promise
+When it was made
+What happened
+Status
+
+Statuses:
+On track
+Partially achieved
+Missed
+Too early to judge
+
+J. GROWTH & CAPEX
+
+Show:
+
+Where future growth could come from
+Capex plans
+New businesses
+Expected growth drivers
+
+Explain them simply.
+
+K. SHAREHOLDING
+
+Show:
+
+Promoters
+FIIs
+DIIs
+Mutual funds
+Public
+
+Also show a simple historical trend.
+
+Then:
+
+"What changed in ownership?"
+
+Explain the change in simple language.
+
+L. VALUATION & "WHAT IS ALREADY PRICED IN?"
+
+Create a prominent section:
+
+"Has the recent bad news already been priced in?"
+
+IMPORTANT:
+Do NOT give a simplistic BUY/SELL answer.
+
+Instead show:
+
+Recent stock movement
+Earnings change
+Current valuation
+Historical valuation
+Available expectations
+
+Then provide a sample analytical conclusion explaining whether the evidence suggests that some of the bad news may already be reflected in the price.
+
+Clearly label this as:
+"AI research assessment — not a certainty."
+
+M. MANAGEMENT QUESTIONS
+
+Create:
+
+"Questions an equity analyst would ask management"
+
+Generate 8 sample questions based specifically on the financial observations shown on the page.
+
+These should NOT be generic questions.
+
+For example:
+"Receivables have grown faster than revenue. What is driving the increase and when do you expect normalization?"
+
+N. LATEST NEWS
+
+Create a news section with 5 realistic SAMPLE news items.
+
+Each should contain:
+
+Headline
+Date
+Category
+"Why it matters"
+
+Categories:
+Results
+Order
+Management
+Regulation
+Industry
+Other
+
+O. WHAT SHOULD INVESTORS WATCH?
+
+Create a final section:
+
+"Things to monitor over the next 2-4 quarters"
+
+Show 5 items.
+
+P. OVERALL COMPANY PICTURE
+
+At the bottom create:
+
+Business quality
+Growth
+Financial health
+Cash flow
+Management execution
+Valuation
+Risk
+
+Use simple indicators such as:
+
+Strong
+Good
+Watch
+Weak
+
+Then provide a concise 2-3 paragraph overall explanation.
+
+DESIGN:
+
+The website should feel like a premium modern financial research platform.
+
+Do NOT make it look like a traditional stock market website filled with tables.
+
+Prioritize:
+- readability
+- whitespace
+- simple explanations
+- clean typography
+- clear hierarchy
+- research cards
+- charts where useful
+- risk indicators
+- expandable sections
+
+The most important content should be understandable to a normal Indian investor who is not a CFA or equity research analyst.
+
+Use INR and Indian numbering where appropriate.
+
+Make the site responsive for desktop and mobile.
+
+NAVIGATION:
+
+Top navigation:
+
+Logo: StockLens
+Search
+Companies
+Research Methodology
+About
+
+On the company page:
+
+Overview
+Business
+Financials
+Cash Flow
+Balance Sheet
+Management
+Risks
+Valuation
+News
+
+IMPORTANT PRODUCT PRINCIPLES:
+
+1. The website explains data; it should not just display data.
+
+2. Every major number should eventually be traceable to a source. For now use "Sample source" labels because we are using sample data.
+
+3. AI should eventually compare multiple sources:
+P&L
+Balance Sheet
+Cash Flow
+Annual Reports
+Investor Presentations
+Concall transcripts
+Shareholding
+News
+Market/valuation data
+
+4. The AI should identify relationships between different pieces of information rather than simply summarizing documents.
+
+5. The system should distinguish:
+FACT
+ANALYSIS
+INFERENCE
+UNCERTAINTY
+
+6. Never fabricate a fact and present it as real data.
+
+7. Never automatically call something fraud or manipulation merely because a financial relationship looks unusual.
+
+8. The future version will use an AI research engine to automatically generate and update these sections.
+
+TECHNICAL REQUIREMENT:
+
+For now:
+- Build only the frontend.
+- Use sample/mock data.
+- Do not connect OpenAI yet.
+- Do not connect Supabase yet.
+- Do not connect financial APIs yet.
+- Do not connect news APIs yet.
+- Structure the code so that these can be added later.
+- Use reusable components.
+- Keep company data separate from UI components so we can replace sample data with database/API data later.
+
+After building it, make sure:
+- Search for "Reliance" works.
+- The Reliance research page loads correctly.
+- All navigation sections work.
+- The page looks polished.
+- No placeholder "Lorem ipsum" text.
+- No broken buttons.
+- No unnecessary features.
+
+Build the complete working prototype now.
