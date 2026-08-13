@@ -1,0 +1,524 @@
+I want to build the BACKEND DATABASE for my existing StockLens website using Supabase.
+
+IMPORTANT:
+
+Keep this extremely simple.
+
+My website is NOT a stock screener.
+It is NOT a financial dashboard.
+It is NOT a chatbot.
+It does NOT need charts.
+It does NOT need complicated financial tables.
+
+The user simply searches for a stock and reads a simple, easy-to-understand research story.
+
+The product promise is:
+
+"Type a stock. Understand the story in 5 minutes."
+
+The website explains:
+
+- What the company does
+- How it makes money
+- What happened recently
+- Why revenue/profit changed
+- Why cash flow changed
+- What is happening in the industry
+- What management is saying
+- Why the stock moved
+- What is going well
+- What is going wrong
+- What the red flags are
+- What investors should watch next
+
+The database should simply store the information needed to generate these explanations.
+
+==================================================
+STEP 1 — CREATE SUPABASE DATABASE
+==================================================
+
+Create only these 5 tables.
+
+--------------------------------------------------
+TABLE 1: companies
+--------------------------------------------------
+
+Fields:
+
+id
+UUID primary key
+
+name
+TEXT
+
+ticker
+TEXT
+
+exchange
+TEXT
+
+sector
+TEXT
+
+industry
+TEXT
+
+short_description
+TEXT
+
+created_at
+TIMESTAMP
+
+updated_at
+TIMESTAMP
+
+
+--------------------------------------------------
+TABLE 2: financial_data
+--------------------------------------------------
+
+This stores the basic financial information that the AI will use.
+
+Fields:
+
+id
+UUID primary key
+
+company_id
+UUID foreign key → companies.id
+
+period
+TEXT
+
+revenue
+NUMERIC
+
+ebitda
+NUMERIC
+
+profit
+NUMERIC
+
+cash_flow
+NUMERIC
+
+debt
+NUMERIC
+
+cash
+NUMERIC
+
+receivables
+NUMERIC
+
+inventory
+NUMERIC
+
+payables
+NUMERIC
+
+capex
+NUMERIC
+
+created_at
+TIMESTAMP
+
+
+Do not create dozens of financial ratios.
+
+We can calculate additional things later when needed.
+
+
+--------------------------------------------------
+TABLE 3: documents
+--------------------------------------------------
+
+This stores company documents and their text.
+
+Examples:
+
+Annual reports
+Quarterly results
+Investor presentations
+Concall transcripts
+Company announcements
+
+Fields:
+
+id
+UUID primary key
+
+company_id
+UUID foreign key → companies.id
+
+title
+TEXT
+
+document_type
+TEXT
+
+document_date
+DATE
+
+source_name
+TEXT
+
+source_url
+TEXT
+
+content
+TEXT
+
+created_at
+TIMESTAMP
+
+
+The "content" field will eventually contain the extracted text from documents so that AI can analyze them.
+
+
+--------------------------------------------------
+TABLE 4: news
+--------------------------------------------------
+
+This stores relevant news.
+
+Fields:
+
+id
+UUID primary key
+
+company_id
+UUID foreign key → companies.id
+
+headline
+TEXT
+
+summary
+TEXT
+
+published_at
+TIMESTAMP
+
+source_name
+TEXT
+
+source_url
+TEXT
+
+category
+TEXT
+
+created_at
+TIMESTAMP
+
+
+Categories can include:
+
+Results
+Management
+Industry
+Regulation
+Order
+Business
+Other
+
+
+--------------------------------------------------
+TABLE 5: research
+--------------------------------------------------
+
+THIS IS THE MOST IMPORTANT TABLE.
+
+This stores the actual simple research that the visitor will read.
+
+Fields:
+
+id
+UUID primary key
+
+company_id
+UUID foreign key → companies.id
+
+section
+TEXT
+
+title
+TEXT
+
+content
+TEXT
+
+last_updated
+TIMESTAMP
+
+created_at
+TIMESTAMP
+
+
+Possible section values:
+
+company
+business_model
+what_happened
+earnings
+cash_flow
+industry
+management
+stock_move
+what_is_going_well
+what_is_going_wrong
+red_flags
+risks
+what_to_watch
+summary
+
+
+==================================================
+STEP 2 — ADD SAMPLE COMPANY
+==================================================
+
+Add:
+
+Reliance Industries
+
+Ticker:
+RELIANCE
+
+Exchange:
+NSE
+
+Sector:
+Diversified
+
+Industry:
+Conglomerate
+
+Do not create fake financial numbers and present them as real.
+
+For development purposes, you may add clearly labelled sample/demo content.
+
+==================================================
+STEP 3 — CONNECT WEBSITE TO SUPABASE
+==================================================
+
+Connect the existing StockLens website to this Supabase database.
+
+IMPORTANT:
+
+Do NOT redesign the website.
+
+Do NOT add charts.
+
+Do NOT create dashboards.
+
+Do NOT add new complicated UI.
+
+Keep the existing simple blog/research design.
+
+When the user searches:
+
+"Reliance"
+
+the application should:
+
+1. Search the companies table.
+2. Find Reliance Industries.
+3. Open the Reliance research page.
+4. Retrieve the relevant research sections from the research table.
+5. Display them as simple readable sections.
+
+The user should experience:
+
+SEARCH RELIANCE
+        ↓
+RELIANCE RESEARCH PAGE
+        ↓
+Read the complete company story
+
+
+==================================================
+STEP 4 — RESEARCH PAGE STRUCTURE
+==================================================
+
+The research page should display the research in this order:
+
+1. What does the company do?
+
+2. How does it make money?
+
+3. What happened recently?
+
+4. Why did earnings change?
+
+5. Why did cash flow change?
+
+6. What is happening in the industry?
+
+7. What is management saying?
+
+8. Why did the stock move?
+
+9. What is going well?
+
+10. What is going wrong?
+
+11. Red flags
+
+12. What could go wrong?
+
+13. What should investors watch?
+
+14. The company in simple words
+
+
+Each section should be primarily text.
+
+The user should feel like they are reading a very well-researched blog/article rather than using a financial terminal.
+
+
+==================================================
+STEP 5 — WRITING STYLE
+==================================================
+
+The future AI-generated research should follow this structure:
+
+WHAT HAPPENED?
+
+Explain the event.
+
+WHY DID IT HAPPEN?
+
+Explain the reason.
+
+WHY DOES IT MATTER?
+
+Explain the consequence.
+
+IS IT A RED FLAG?
+
+Explain whether investors should be concerned.
+
+WHAT SHOULD WE WATCH NEXT?
+
+Explain what could confirm or disprove the concern.
+
+Use simple English.
+
+Example:
+
+Instead of:
+
+"Working capital intensity increased materially."
+
+Write:
+
+"More money is getting stuck in the business because customers are taking longer to pay."
+
+Instead of:
+
+"Accrual quality deteriorated."
+
+Write:
+
+"Profit increased, but much less of that profit turned into actual cash."
+
+The research should sound like a smart investor explaining the company to a friend.
+
+
+==================================================
+STEP 6 — PREPARE FOR AI LATER
+==================================================
+
+DO NOT connect OpenAI yet.
+
+DO NOT connect any financial API yet.
+
+DO NOT connect any news API yet.
+
+We will add those separately.
+
+The future AI workflow will be:
+
+Company data
++
+Financial data
++
+Annual reports
++
+Quarterly results
++
+Concall transcripts
++
+News
++
+Industry information
+
+        ↓
+
+AI reads the information
+
+        ↓
+
+AI connects the dots
+
+        ↓
+
+AI identifies:
+
+What happened
+Why it happened
+Why it matters
+Potential red flags
+What investors should watch
+
+        ↓
+
+AI writes the simple research
+
+        ↓
+
+Save the result in the "research" table
+
+        ↓
+
+Website displays it
+
+
+==================================================
+STEP 7 — SECURITY
+==================================================
+
+Use environment variables for Supabase credentials.
+
+Do not expose secret/service-role keys in frontend code.
+
+Use safe server-side access where necessary.
+
+Enable appropriate Row Level Security.
+
+==================================================
+FINAL REQUIREMENTS
+==================================================
+
+Before finishing:
+
+1. Make sure Supabase is connected.
+2. Make sure the 5 tables exist.
+3. Make sure Reliance Industries exists in the companies table.
+4. Make sure the website can search Reliance.
+5. Make sure the Reliance research page retrieves information from Supabase.
+6. Do not break the existing website.
+7. Do not add unnecessary features.
+8. Tell me exactly which Supabase credentials I need to put into Replit Secrets.
+
+STOP AFTER THIS.
+
+Do NOT build the AI system yet.
+
+Do NOT connect financial APIs yet.
+
+Do NOT build subscriptions yet.
+
+Do NOT add charts.
+
+Keep the system simple and ready for the next step.
