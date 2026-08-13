@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface ResearchSection {
+  id: string;
+  section: string;
+  title: string;
+  content: string;
+  last_updated: Date;
 }
