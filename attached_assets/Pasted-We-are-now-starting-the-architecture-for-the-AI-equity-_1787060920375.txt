@@ -1,0 +1,151 @@
+We are now starting the architecture for the AI equity research engine.
+
+IMPORTANT:
+Do NOT build the complete research engine yet.
+Do NOT redesign the existing website.
+Do NOT add charts.
+Do NOT add user-facing questions.
+Do NOT generate fake company data.
+
+Build only the foundation.
+
+The product concept is:
+
+A user searches for an Indian listed company and receives a concise,
+investor-friendly research report. The AI must first understand the
+company, its industry, business model and strategy, then decide what
+analysis is relevant to that company.
+
+The AI must NOT simply answer a fixed list of questions.
+
+Create the following architecture:
+
+1. COMPANY PROFILE
+Store:
+- company name
+- ticker
+- exchange
+- sector
+- industry
+- sub-industry
+- business description
+- business segments
+- revenue sources
+- key products/services
+- competitors
+
+2. RESEARCH FRAMEWORK
+Create a structure that can contain:
+- business analysis
+- industry analysis
+- management analysis
+- financial analysis
+- cash flow analysis
+- balance sheet analysis
+- capital allocation
+- shareholder/promoter analysis
+- related-party transaction analysis
+- accounting/red-flag analysis
+- valuation analysis
+- peer analysis
+- industry-specific metrics
+- recent developments/news
+- investment risks
+- positive developments
+
+3. DYNAMIC ANALYSIS
+The AI must determine which parts of the framework are relevant
+depending on the company's industry and business model.
+
+For example:
+- Bank → NIM, NPA, CASA, credit growth, ROA, ROE, P/B
+- EPC → order book, execution, working capital, receivables,
+  margins, ROCE, debt
+- Manufacturing → capacity utilization, asset turnover,
+  margins, working capital, ROCE
+- IT → revenue growth, margins, utilization, attrition,
+  deal wins, cash generation
+
+Do not apply irrelevant metrics.
+
+4. EVIDENCE SYSTEM
+Every important AI conclusion must be based on available source data.
+
+Store:
+- claim
+- supporting source
+- source date
+- data point
+- AI interpretation
+- confidence level
+
+The AI must distinguish:
+FACT
+INFERENCE
+UNCERTAIN
+
+If evidence is insufficient, the AI must say that it cannot determine
+the conclusion rather than inventing an answer.
+
+5. CROSS-CHECK ENGINE
+Create the foundation for comparing:
+- P&L vs balance sheet
+- P&L vs cash flow
+- revenue vs receivables
+- profit vs operating cash flow
+- debt vs interest expense
+- capex vs depreciation
+- management commentary vs actual results
+- order book vs revenue
+- promoter/shareholder changes vs company developments
+
+6. FINAL REPORT STRUCTURE
+
+The eventual user-facing report should NOT display questions.
+
+It should display only useful conclusions:
+
+- Business
+- What is happening
+- Financial picture
+- Cash flow
+- Balance sheet
+- Business outlook
+- Industry
+- Management
+- Shareholders
+- Governance
+- Related-party transactions
+- Red flags
+- Positive developments
+- Valuation
+- Investor takeaway
+
+The report should be concise, factual, logical and investor-friendly.
+
+It can be long when the company requires it, but every sentence must
+provide useful information.
+
+7. IMPORTANT AI RULES
+
+The AI must:
+- never fabricate financial information
+- never invent reasons for a price movement
+- never assume a red flag exists without evidence
+- never treat every related-party transaction as suspicious
+- never blindly trust management commentary
+- never blindly trust one financial statement
+- identify contradictions between sources
+- clearly distinguish facts from interpretation
+- say "insufficient evidence" when appropriate
+- use the company's actual business model and industry context
+- avoid generic financial commentary
+
+For now, ONLY create the database/schema and backend architecture
+required for this system.
+
+Do not populate it with thousands of companies.
+Do not build the final AI analysis yet.
+
+After completing this foundation, explain exactly what you created
+and wait for my next instruction.
