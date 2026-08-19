@@ -1,0 +1,277 @@
+We are now starting the DATA SOURCE ARCHITECTURE for the equity
+research engine.
+
+IMPORTANT:
+Do NOT connect paid external APIs yet.
+Do NOT scrape thousands of companies.
+Do NOT generate company reports yet.
+Do NOT change the existing website UI.
+Do NOT modify or remove the existing research framework.
+
+The goal of this task is ONLY to build the data ingestion foundation.
+
+The product will eventually analyze Indian listed companies using
+reliable primary and secondary sources.
+
+Create a clean data-source architecture with the following concepts:
+
+1. COMPANY MASTER DATA
+
+Each company should have:
+- company name
+- legal name
+- ticker
+- exchange
+- ISIN
+- sector
+- industry
+- sub-industry
+- company type
+- parent/holding company if applicable
+- reporting currency
+- financial year-end
+- active/inactive status
+
+2. FINANCIAL DATA
+
+Create a structure capable of storing:
+
+- Revenue
+- EBITDA
+- EBIT
+- PAT
+- EPS
+- Other income
+- Finance cost
+- Total assets
+- Net worth/equity
+- Cash
+- Total debt
+- Net debt
+- Operating cash flow
+- Investing cash flow
+- Financing cash flow
+- Capex
+- Receivables
+- Inventory
+- Payables
+- Working capital
+- Depreciation
+- Minority interest
+
+Every financial data point MUST retain:
+
+- company
+- entity
+- metric
+- value
+- unit
+- currency
+- reporting period
+- fiscal year
+- quarter/year
+- statement type
+- accounting basis:
+  STANDALONE
+  CONSOLIDATED
+- source
+- source URL/document
+- source date
+- extraction date
+
+CRITICAL:
+Never allow a financial number without its accounting basis.
+
+3. DOCUMENTS
+
+Create a document structure for:
+
+- Annual reports
+- Quarterly results
+- Investor presentations
+- Concall transcripts
+- MD&A
+- Auditor reports
+- Notes to accounts
+- Shareholding patterns
+- Corporate announcements
+- Exchange filings
+- Credit rating reports
+- Other company filings
+
+Each document should store:
+- company
+- document type
+- reporting period
+- publication date
+- source
+- source URL
+- document URL/file reference
+- text extraction status
+- processing status
+
+4. NEWS
+
+Create a structure for company-related news:
+
+- company
+- headline
+- summary/content
+- publication date
+- source
+- source URL
+- news category
+- relevance
+- materiality
+- processed/unprocessed status
+
+Do NOT generate AI conclusions at this stage.
+
+5. MANAGEMENT COMMENTARY
+
+Create a structure to preserve management statements separately
+from AI interpretation.
+
+Store:
+- company
+- statement
+- speaker
+- source document
+- date
+- topic
+- guidance/claim type
+- reporting period
+
+This is important because later we need to compare:
+
+MANAGEMENT SAID
+vs
+WHAT ACTUALLY HAPPENED
+
+6. SHAREHOLDING
+
+Create a structure for:
+
+- promoter holding
+- promoter pledge
+- FII/FPI holding
+- DII holding
+- mutual funds
+- public shareholders
+- major shareholders
+- share count
+- changes from previous period
+
+Store the reporting period and source for every observation.
+
+7. DATA QUALITY
+
+Create a data-quality layer.
+
+Every imported data point should have a status such as:
+
+VERIFIED
+UNVERIFIED
+CONFLICTING
+MISSING
+
+If two sources provide different numbers, DO NOT silently choose one.
+
+Store both values and flag the conflict for resolution.
+
+8. SOURCE PRIORITY
+
+Create a source hierarchy.
+
+Prefer:
+
+Tier 1:
+- Company annual reports
+- Company filings
+- NSE/BSE filings
+- Auditor reports
+- Official regulatory filings
+
+Tier 2:
+- Company investor presentations
+- Official company announcements
+- Concall transcripts
+
+Tier 3:
+- Reliable financial-data providers
+- Reliable news providers
+
+Tier 4:
+- Other secondary sources
+
+The AI must prefer higher-quality sources when sources conflict.
+
+9. ACCOUNTING BASIS INTEGRITY
+
+Build validation rules so that:
+
+- standalone and consolidated figures are never silently mixed
+- ratios cannot be calculated using incompatible bases
+- peer comparisons require comparable accounting basis
+- reporting periods must match
+- units/currencies must match
+- entity must match
+
+If a comparison is not reliable, mark it as
+INSUFFICIENT_DATA or NON_COMPARABLE.
+
+10. DATA LINEAGE
+
+Every AI-generated conclusion must eventually be traceable back to:
+
+Conclusion
+→ Evidence
+→ Financial/document data
+→ Original source
+
+Do not build the final AI conclusion engine yet.
+
+11. DO NOT BUILD AUTOMATIC DATA SCRAPING YET
+
+For this stage, create only:
+
+- database tables/structures
+- TypeScript types/interfaces
+- validation functions
+- source hierarchy
+- data-quality rules
+- ingestion interfaces
+- document metadata structures
+
+Do not connect external paid APIs.
+
+Do not scrape websites.
+
+Do not add thousands of companies.
+
+Do not populate fake financial data.
+
+Use the existing Reliance demo data only where necessary to test
+the structure, but clearly label it as DEMO.
+
+12. IMPORTANT
+
+Before changing anything:
+inspect the existing database and TypeScript architecture.
+
+Reuse existing tables/types where appropriate.
+
+Do not create duplicate company, evidence, research or cross-check
+structures that already exist.
+
+After completing the work, report:
+
+A. What new structures were created
+B. What existing structures were reused
+C. What validation rules were added
+D. How accounting basis integrity is enforced
+E. How source/data lineage will work
+F. Whether TypeScript checks pass
+
+Do not proceed to external API integration after this task.
+Stop and wait for my next instruction.
