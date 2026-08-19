@@ -14,6 +14,13 @@ import { runIngestionPipeline } from "../lib/ingestion/pipeline.js";
 import { fetchAndExtractNseResults, fetchNseShareholding } from "../lib/ingestion/nse-results.js";
 import { storeFinancialMetric } from "../lib/ingestion/store.js";
 import { extractPdfFromUrl, toDbExtractionStatus } from "../lib/ingestion/pdf-extractor.js";
+import {
+  chunkPages,
+  buildDocumentPreview,
+  storeDocumentChunks,
+  getDocumentChunks,
+  searchDocumentChunks,
+} from "../lib/ingestion/chunk-manager.js";
 import { logger } from "../lib/logger.js";
 
 export const ingestionRouter = Router();
@@ -261,22 +268,21 @@ ingestionRouter.post("/nse-shareholding", async (req: Request, res: Response) =>
 // POST /api/ingestion/extract-pdf
 // Body: { companyId, url, documentType?, reportingPeriod?, title? }
 //
-// Downloads the PDF at `url`, runs pdftotext (poppler), stores the
-// extracted text in documents.content with page markers, and returns
-// a full extraction report.
+// Full chunked PDF ingestion pipeline:
+//   1. Download PDF from url (NSE archives accessible; no login required)
+//   2. Extract ALL pages via pdftotext — never truncated
+//   3. Chunk pages (page-level, grouping small pages, splitting large pages)
+//   4. Store compact preview in documents.content
+//   5. Store ALL chunks in document_chunks table (no data discarded)
 //
+// Scanned/image PDFs: rejected with status="scanned", never stored, never invented.
 // Does NOT generate financial data. Does NOT modify accounting-basis rules.
-// Scanned/image PDFs are rejected (status = "scanned"), never invented.
+//
+// NOTE: Requires migration_005_document_chunks.sql to have been run in Supabase.
 // ─────────────────────────────────────────────────────────────
 
 ingestionRouter.post("/extract-pdf", async (req: Request, res: Response) => {
-  const {
-    companyId,
-    url,
-    documentType,
-    reportingPeriod,
-    title,
-  } = req.body as {
+  const { companyId, url, documentType, reportingPeriod, title } = req.body as {
     companyId?: string;
     url?: string;
     documentType?: string;
@@ -292,13 +298,12 @@ ingestionRouter.post("/extract-pdf", async (req: Request, res: Response) => {
         url: "https://nsearchives.nseindia.com/corporate/kavinavora_17072026190726_SE_FR_1.pdf",
         documentType: "quarterly_result",
         reportingPeriod: "Q1FY27",
-        title: "Outcome of Board Meeting — Q1FY27 Financial Results",
+        title: "Reliance Q1FY27 Financial Results",
       },
     });
     return;
   }
 
-  // Basic URL validation
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(url);
@@ -311,71 +316,95 @@ ingestionRouter.post("/extract-pdf", async (req: Request, res: Response) => {
     return;
   }
 
-  logger.info({ companyId, url, documentType }, "PDF extraction requested");
+  logger.info({ companyId, url, documentType }, "Chunked PDF extraction requested");
 
   try {
-    // ── 1. Extract PDF text ────────────────────────────────────
+    // ── 1. Extract ALL pages (no truncation) ──────────────────
     const extraction = await extractPdfFromUrl(url);
     const dbStatus = toDbExtractionStatus(extraction.extractionStatus);
 
-    // ── 2. Store in documents table ────────────────────────────
+    // ── 2. Chunking ───────────────────────────────────────────
+    // Always chunk (even failed extractions get a metadata-only chunk 0).
+    const metadataHeader = extraction.metadataHeader ?? `[EXTRACTION_METADATA]\n{"sourceUrl":"${url}","failed":true}`;
+    const chunks = chunkPages(extraction.pages, metadataHeader);
+
+    // Compact preview for documents.content (≤ ~5 KB)
+    const documentPreview = buildDocumentPreview(
+      metadataHeader,
+      extraction.pages,
+      chunks.length,
+    );
+
+    // ── 3. Store document row (compact preview, not full text) ─
     let documentId: string | null = null;
-    let storageError: string | null = null;
+    let docStorageError: string | null = null;
 
-    if (extraction.contentBlock || !extraction.success) {
-      const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/+$/, "");
-      const supabaseKey = process.env.SUPABASE_SECRET_KEY;
+    const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/+$/, "");
+    const supabaseKey = process.env.SUPABASE_SECRET_KEY;
 
-      if (supabaseUrl && supabaseKey) {
-        const docPayload: Record<string, unknown> = {
-          company_id: companyId,
-          title: title ?? extraction.metadata.title ?? parsedUrl.pathname.split("/").pop() ?? "PDF Document",
-          document_type: documentType ?? "other_filing",
-          reporting_period: reportingPeriod ?? null,
-          document_date: extraction.metadata.creationDate
-            ? extraction.metadata.creationDate.slice(0, 10).replace(/[A-Za-z].*/, "").trim() || null
-            : null,
-          publication_date: null,
-          source_name: parsedUrl.hostname.includes("nseindia") ? "NSE" : parsedUrl.hostname,
-          source_url: url,
-          document_url: url,
-          source_tier: parsedUrl.hostname.includes("nseindia") ? 1 : 2,
-          content: extraction.contentBlock,
-          text_extraction_status: dbStatus,
-          processing_status: extraction.success ? "processed" : "failed",
-        };
+    if (supabaseUrl && supabaseKey) {
+      const docTitle = title
+        ?? extraction.metadata.title
+        ?? parsedUrl.pathname.split("/").pop()
+        ?? "PDF Document";
 
-        const storeResp = await fetch(`${supabaseUrl}/rest/v1/documents`, {
-          method: "POST",
-          headers: {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-            "Content-Type": "application/json",
-            Prefer: "return=representation",
-          },
-          body: JSON.stringify(docPayload),
-        });
+      const docPayload = {
+        company_id: companyId,
+        title: docTitle,
+        document_type: documentType ?? "other_filing",
+        reporting_period: reportingPeriod ?? null,
+        document_date: null as string | null,
+        publication_date: null,
+        source_name: parsedUrl.hostname.includes("nseindia") ? "NSE" : parsedUrl.hostname,
+        source_url: url,
+        document_url: url,
+        source_tier: parsedUrl.hostname.includes("nseindia") ? 1 : 2,
+        content: documentPreview,           // compact: metadata + first 3 pages preview
+        text_extraction_status: dbStatus,
+        processing_status: extraction.success ? "processed" : "failed",
+      };
 
-        const storeText = await storeResp.text();
-        if (storeResp.ok) {
-          try {
-            const rows = JSON.parse(storeText) as Array<{ id: string }>;
-            documentId = rows[0]?.id ?? null;
-          } catch { documentId = null; }
-        } else {
-          storageError = `HTTP ${storeResp.status}: ${storeText.slice(0, 200)}`;
-          logger.error({ storageError, url }, "Document storage failed");
-        }
+      const storeResp = await fetch(`${supabaseUrl}/rest/v1/documents`, {
+        method: "POST",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+        },
+        body: JSON.stringify(docPayload),
+      });
+
+      const storeText = await storeResp.text();
+      if (storeResp.ok) {
+        try {
+          const rows = JSON.parse(storeText) as Array<{ id: string }>;
+          documentId = rows[0]?.id ?? null;
+        } catch { documentId = null; }
       } else {
-        storageError = "Supabase not configured (SUPABASE_URL / SUPABASE_SECRET_KEY missing)";
+        docStorageError = `HTTP ${storeResp.status}: ${storeText.slice(0, 300)}`;
+        logger.error({ docStorageError, url }, "Document row storage failed");
       }
+    } else {
+      docStorageError = "Supabase not configured";
     }
 
-    // ── 3. Return structured report ────────────────────────────
-    res.json({
-      status: extraction.success ? "success" : extraction.extractionStatus,
+    // ── 4. Store ALL chunks (only if document row was created) ─
+    let chunkResult = { totalChunks: 0, storedChunks: 0, failedChunks: 0, errors: [] as string[] };
 
-      // ── Extraction details ─────────────────────────────────
+    if (documentId && extraction.success) {
+      chunkResult = await storeDocumentChunks(documentId, companyId, chunks);
+    } else if (documentId && !extraction.success) {
+      // Store just the metadata header chunk so the document is findable
+      chunkResult = await storeDocumentChunks(documentId, companyId, chunks.slice(0, 1));
+    }
+
+    // ── 5. Return structured report ────────────────────────────
+    res.json({
+      status: extraction.success
+        ? (chunkResult.failedChunks === 0 ? "success" : "partial_chunk_failure")
+        : extraction.extractionStatus,
+
       extraction: {
         tool: "pdftotext (poppler-utils — pre-installed in Replit environment)",
         flags: "-layout -enc UTF-8",
@@ -386,35 +415,157 @@ ingestionRouter.post("/extract-pdf", async (req: Request, res: Response) => {
         error: extraction.error ?? null,
       },
 
-      // ── Document facts ─────────────────────────────────────
       document: {
         pageCount: extraction.pageCount,
         extractedPageCount: extraction.extractedPageCount,
         emptyPageCount: extraction.emptyPageCount,
         totalChars: extraction.totalChars,
-        wasTruncated: extraction.wasTruncated,
         metadata: extraction.metadata,
       },
 
-      // ── Page-level preview ─────────────────────────────────
+      chunking: {
+        totalChunks: chunkResult.totalChunks,
+        storedChunks: chunkResult.storedChunks,
+        failedChunks: chunkResult.failedChunks,
+        strategy: "page-level (small pages grouped ≤3, large pages split at 4000 chars)",
+        chunkErrors: chunkResult.errors.length > 0 ? chunkResult.errors.slice(0, 3) : undefined,
+      },
+
+      storage: {
+        documentId,
+        documentStored: documentId !== null,
+        chunksStored: chunkResult.storedChunks,
+        dbExtractionStatus: dbStatus,
+        docStorageError: docStorageError ?? null,
+        retrievalEndpoints: documentId ? {
+          allChunks: `/api/ingestion/chunks/${documentId}`,
+          pageRange: `/api/ingestion/chunks/${documentId}?pageFrom=5&pageTo=10`,
+          search: `/api/ingestion/search-chunks (POST with companyId + query)`,
+        } : null,
+      },
+
       pagePreview: extraction.pages.slice(0, 3).map((p) => ({
         pageNum: p.pageNum,
         charCount: p.charCount,
         isEmpty: p.isEmpty,
         preview: p.text.slice(0, 400).replace(/\s+/g, " ").trim(),
       })),
-
-      // ── Storage result ─────────────────────────────────────
-      storage: {
-        documentId,
-        stored: documentId !== null,
-        dbExtractionStatus: dbStatus,
-        error: storageError,
-      },
     });
   } catch (err) {
     logger.error({ err, url }, "PDF extraction route failed");
     res.status(500).json({ error: "PDF extraction failed", detail: String(err) });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// GET /api/ingestion/chunks/:documentId
+// Query params: pageFrom?, pageTo?, limit? (default 50)
+//
+// Returns ordered document chunks. Use pageFrom/pageTo to narrow
+// to a page range.  chunk_index 0 (metadata header) is excluded by default.
+// ─────────────────────────────────────────────────────────────
+
+ingestionRouter.get("/chunks/:documentId", async (req: Request, res: Response) => {
+  const documentId = String(req.params["documentId"] ?? "");
+  const pageFrom = req.query.pageFrom ? parseInt(String(req.query.pageFrom), 10) : undefined;
+  const pageTo   = req.query.pageTo   ? parseInt(String(req.query.pageTo),   10) : undefined;
+  const limit    = req.query.limit    ? parseInt(String(req.query.limit),    10) : 50;
+  const withMeta = req.query.meta === "true";
+
+  if (!documentId) { res.status(400).json({ error: "documentId required" }); return; }
+
+  try {
+    const chunks = await getDocumentChunks(documentId, {
+      pageFrom, pageTo, limit, includeMetadata: withMeta,
+    });
+    res.json({
+      documentId,
+      total: chunks.length,
+      pageRange: pageFrom || pageTo ? { pageFrom, pageTo } : "all",
+      chunks: chunks.map((c) => ({
+        chunkIndex: c.chunkIndex,
+        pageStart:  c.pageStart,
+        pageEnd:    c.pageEnd,
+        chunkLabel: c.chunkLabel,
+        charCount:  c.charCount,
+        content:    c.content,
+      })),
+    });
+  } catch (err) {
+    const msg = String(err);
+    // Friendly error if migration_005 hasn't been run yet
+    if (msg.includes("does not exist") || msg.includes("42P01")) {
+      res.status(503).json({
+        error: "document_chunks table not found",
+        fix: "Run migration_005_document_chunks.sql in the Supabase SQL Editor",
+      });
+    } else {
+      res.status(500).json({ error: msg });
+    }
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// POST /api/ingestion/search-chunks
+// Body: { companyId, query, limit? }
+//
+// Case-insensitive keyword search across all document_chunks for
+// a company.  Returns matching chunks with full content and page refs.
+// Backed by the document_chunks_fts_idx GIN index for future ts_rank upgrade.
+// ─────────────────────────────────────────────────────────────
+
+ingestionRouter.post("/search-chunks", async (req: Request, res: Response) => {
+  const { companyId, query, limit } = req.body as {
+    companyId?: string;
+    query?: string;
+    limit?: number;
+  };
+
+  if (!companyId || !query) {
+    res.status(400).json({
+      error: "companyId and query are required",
+      example: {
+        companyId: "11111111-1111-4111-8111-111111111111",
+        query: "standalone financial results",
+        limit: 5,
+      },
+    });
+    return;
+  }
+
+  if (query.trim().length < 2) {
+    res.status(400).json({ error: "query must be at least 2 characters" });
+    return;
+  }
+
+  try {
+    const results = await searchDocumentChunks(companyId, query, limit ?? 10);
+    res.json({
+      companyId,
+      query,
+      total: results.length,
+      results: results.map((r) => ({
+        chunkId:       r.chunkId,
+        documentId:    r.documentId,
+        documentTitle: r.documentTitle,
+        chunkIndex:    r.chunkIndex,
+        chunkLabel:    r.chunkLabel,
+        pageStart:     r.pageStart,
+        pageEnd:       r.pageEnd,
+        charCount:     r.charCount,
+        content:       r.content,
+      })),
+    });
+  } catch (err) {
+    const msg = String(err);
+    if (msg.includes("does not exist") || msg.includes("42P01")) {
+      res.status(503).json({
+        error: "document_chunks table not found",
+        fix: "Run migration_005_document_chunks.sql in the Supabase SQL Editor",
+      });
+    } else {
+      res.status(500).json({ error: msg });
+    }
   }
 });
 
