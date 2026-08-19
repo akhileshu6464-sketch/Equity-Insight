@@ -120,6 +120,7 @@ export interface ResearchJob {
 // ─────────────────────────────────────────────────────────────
 
 export const AI_RULES = {
+  // ── Core integrity rules (original) ──────────────────────────
   NEVER_FABRICATE:
     "Never fabricate financial information. If a figure is not in the source data, say it is unavailable.",
   NEVER_INVENT_PRICE_REASONS:
@@ -140,6 +141,24 @@ export const AI_RULES = {
     "When evidence is insufficient to reach a conclusion, say so explicitly. Do not guess.",
   USE_BUSINESS_CONTEXT:
     "Every analysis must use the company's actual business model and industry. Avoid generic commentary.",
+
+  // ── Context-first behaviour (new) ────────────────────────────
+  CONTEXT_BEFORE_CONCLUSION:
+    "Understand the company, its business model, industry, strategy and financial structure before applying any research check. Do not force checks onto companies where they are not relevant.",
+  MATERIALITY_BEFORE_FLAG:
+    "Assess materiality before reporting a concern. A condition must be material in size, persistent in duration, and supported by evidence before it becomes a finding.",
+  NO_MECHANICAL_FLAGGING:
+    "Do not mechanically flag a condition as a red flag. An auditor change, a contingent liability, high promoter remuneration and exceptional items each require investigation and context — not automatic suspicion.",
+
+  // ── Financial basis integrity (new) ──────────────────────────
+  NEVER_MIX_BASIS:
+    "Never mix standalone and consolidated financial figures in a single calculation. Tag every figure with its reporting entity and basis.",
+  TRACK_PERIOD:
+    "Every financial figure must be tagged with the exact reporting period. Do not compare figures from different periods without explicit adjustment.",
+  PEER_NORMALISATION:
+    "For peer comparisons, normalise the reporting basis and period before comparing. If a clean comparison cannot be made on available data, say so explicitly and do not manufacture one.",
+  BASIS_BY_QUESTION:
+    "The appropriate reporting basis (standalone vs consolidated) must be determined by the analytical question and company structure, not by a blanket rule.",
 } as const;
 
 export type AiRule = (typeof AI_RULES)[keyof typeof AI_RULES];

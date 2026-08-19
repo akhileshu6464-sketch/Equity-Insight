@@ -94,6 +94,68 @@ export interface CrossCheckRule {
 }
 
 // ─────────────────────────────────────────────────────────────
+// RESEARCH CHECK — internal AI investigation rule
+// These are NOT displayed to users. They are internal prompts
+// the AI uses to decide what to investigate for a given company.
+// Context, materiality, duration and evidence determine whether
+// a check produces a conclusion — the mere existence of a
+// condition is never automatically a red flag.
+// ─────────────────────────────────────────────────────────────
+
+export type ResearchCheckCategory =
+  | "accounting"
+  | "auditor"
+  | "consolidated"
+  | "capital_allocation"
+  | "shareholder_economics"
+  | "management"
+  | "contingent_liabilities"
+  | "long_term";
+
+export interface ResearchCheck {
+  /** Unique key — matches check_key in the DB */
+  checkKey: string;
+  category: ResearchCheckCategory;
+  /** What the AI must investigate */
+  description: string;
+  /**
+   * When this check is relevant.
+   * The AI must evaluate relevance before applying the check.
+   * Not every check applies to every company.
+   */
+  relevanceNote: string;
+  /**
+   * Reminder that the existence of a condition is not a conclusion.
+   * Always true — included to make the contract explicit.
+   */
+  notAutomaticRedFlag: true;
+  /** What context must be established before a conclusion can be drawn */
+  contextRequired: string;
+}
+
+// ─────────────────────────────────────────────────────────────
+// FINANCIAL BASIS INTEGRITY RULES
+// The AI must apply these to every financial calculation.
+// Never mix standalone and consolidated figures.
+// Never compare peers on different bases without normalising.
+// ─────────────────────────────────────────────────────────────
+
+export const FINANCIAL_BASIS_RULES = {
+  TRACK_ENTITY:
+    "Every financial figure must be tagged with the reporting entity (parent standalone, consolidated group, or named subsidiary).",
+  TRACK_BASIS:
+    "Every financial figure must be tagged as standalone or consolidated. Never mix the two in a single calculation.",
+  TRACK_PERIOD:
+    "Every financial figure must be tagged with the exact reporting period (FY24, Q3FY25, LTM, etc.).",
+  TRACK_SOURCE:
+    "Every financial figure must reference its source document (annual report, quarterly filing, investor presentation, page number where available).",
+  PEER_NORMALISATION:
+    "For peer comparisons, normalise the reporting basis and period before comparing. If a clean comparison cannot be made on the available data, state that and do not manufacture one.",
+  BASIS_BY_QUESTION:
+    "The appropriate reporting basis (standalone vs consolidated) must be determined by the analytical question, company structure and industry — not by a blanket rule.",
+} as const;
+
+// ─────────────────────────────────────────────────────────────
 // INDUSTRY FRAMEWORK
 // ─────────────────────────────────────────────────────────────
 
@@ -158,12 +220,16 @@ export const INDUSTRY_FRAMEWORKS: Record<IndustryType, IndustryFramework> = {
       { metricName: "roce",              metricLabel: "ROCE",                   whyItMatters: "Is capital being deployed productively?" },
     ],
     crossCheckRules: [
-      { ruleKey: "pl_vs_cashflow",         description: "P&L profit vs operating cash flow",        metricA: "pat",            metricB: "operating_cash",    expectedRelationship: "operating_cash should exceed pat for a healthy business" },
-      { ruleKey: "revenue_vs_receivables", description: "Revenue growth vs receivables growth",     metricA: "revenue_growth", metricB: "receivables_growth", expectedRelationship: "receivables should not consistently outpace revenue" },
-      { ruleKey: "profit_vs_cashflow",     description: "Reported profit vs operating cash",        metricA: "ebitda",         metricB: "operating_cash",    expectedRelationship: "large persistent divergence warrants investigation" },
-      { ruleKey: "debt_vs_interest",       description: "Total debt vs interest expense",           metricA: "debt",           metricB: "interest_expense",  expectedRelationship: "implied rate should be plausible given market rates" },
-      { ruleKey: "capex_vs_depreciation",  description: "Capex vs depreciation",                   metricA: "capex",          metricB: "depreciation",      expectedRelationship: "high capex/depreciation signals heavy investment phase" },
-      { ruleKey: "mgmt_guidance_vs_result",description: "Prior management guidance vs actual",     metricA: "guided_metric",  metricB: "actual_metric",     expectedRelationship: "consistent misses erode credibility" },
+      { ruleKey: "pl_vs_cashflow",         description: "P&L profit vs operating cash flow",        metricA: "pat",              metricB: "operating_cash",      expectedRelationship: "operating_cash should exceed pat for a healthy business" },
+      { ruleKey: "revenue_vs_receivables", description: "Revenue growth vs receivables growth",     metricA: "revenue_growth",   metricB: "receivables_growth",  expectedRelationship: "receivables should not consistently outpace revenue" },
+      { ruleKey: "profit_vs_cashflow",     description: "Reported profit vs operating cash",        metricA: "ebitda",           metricB: "operating_cash",      expectedRelationship: "large persistent divergence warrants investigation" },
+      { ruleKey: "debt_vs_interest",       description: "Total debt vs interest expense",           metricA: "debt",             metricB: "interest_expense",    expectedRelationship: "implied rate should be plausible given market rates" },
+      { ruleKey: "capex_vs_depreciation",  description: "Capex vs depreciation",                   metricA: "capex",            metricB: "depreciation",        expectedRelationship: "high capex/depreciation signals heavy investment phase" },
+      { ruleKey: "mgmt_guidance_vs_result",description: "Prior management guidance vs actual",     metricA: "guided_metric",    metricB: "actual_metric",       expectedRelationship: "consistent misses erode credibility" },
+      // ── New cross-check rules added in migration 002 ──────────────────────────────
+      { ruleKey: "eps_vs_pat_growth",      description: "EPS growth vs PAT growth — detects share-count dilution",    metricA: "eps_growth",       metricB: "pat_growth",          expectedRelationship: "EPS growing materially slower than PAT indicates dilution from QIPs, warrants, ESOPs or preferential allotments; investigate cause and shareholder impact" },
+      { ruleKey: "other_income_vs_pat",    description: "Other income as proportion of reported PAT",                 metricA: "other_income",     metricB: "pat",                 expectedRelationship: "other income consistently exceeding 20-25% of PAT shifts profit source away from core operations; assess sustainability and recurrence" },
+      { ruleKey: "exceptional_vs_pat",     description: "Exceptional and non-recurring items relative to PAT",        metricA: "exceptional_items",metricB: "pat",                 expectedRelationship: "significant exceptional items require computing adjusted PAT; a one-time gain must not be treated as recurring" },
     ],
   },
 
@@ -419,4 +485,233 @@ export function selectFramework(params: {
  */
 export function getRequiredSections(framework: IndustryFramework): SectionDefinition[] {
   return framework.sections.filter((s) => s.required);
+}
+
+// ─────────────────────────────────────────────────────────────
+// UNIVERSAL RESEARCH CHECKS
+// Internal AI investigation rules that apply to every company
+// regardless of industry.  The AI must decide which are relevant
+// before applying them.  These must never appear as questions
+// in the user-facing report.
+// ─────────────────────────────────────────────────────────────
+
+export const UNIVERSAL_RESEARCH_CHECKS: ResearchCheck[] = [
+
+  // ── ACCOUNTING ──────────────────────────────────────────────
+  {
+    checkKey: "accounting_policy_changes",
+    category: "accounting",
+    description: "Investigate whether the company changed accounting policies or material accounting estimates (depreciation, useful lives, revenue recognition, inventory valuation) and whether those changes materially affected reported earnings.",
+    relevanceNote: "Apply when the notes to accounts or auditor report flag a change, or when margins shift sharply without an obvious operational explanation.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Determine whether the change was driven by a genuine shift in business reality, regulatory alignment (Ind AS transition, SEBI mandate) or earnings management. Quantify the impact before concluding.",
+  },
+  {
+    checkKey: "exceptional_items_quality",
+    category: "accounting",
+    description: "Quantify exceptional and non-recurring items (asset disposals, impairments, litigation settlements, restructuring charges, forex gains/losses on debt). Compute adjusted PAT excluding these items and assess the underlying operating trend.",
+    relevanceNote: "Always apply. Recurring reliance on exceptional gains to report profit growth is a concern; a one-time write-down of a genuinely impaired asset is not.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Assess whether the item is truly non-recurring, whether it recurs in multiple periods, and whether management is transparent about it.",
+  },
+  {
+    checkKey: "other_income_quality",
+    category: "accounting",
+    description: "Assess how much of reported profit comes from other income (interest on surplus cash, dividends from subsidiaries, profit on asset sales, rental income, forex translation gains) rather than the core operating business.",
+    relevanceNote: "Apply when other income is a material proportion of reported PAT. Especially important for holding companies, cash-rich businesses and conglomerates.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Distinguish structural other income (e.g., interest on a genuinely cash-rich treasury) from non-recurring items misclassified as other income. Assess recurrence and cash realisation.",
+  },
+
+  // ── AUDITOR ──────────────────────────────────────────────────
+  {
+    checkKey: "auditor_change",
+    category: "auditor",
+    description: "Investigate whether the statutory auditor changed or resigned. Establish the stated reason, the timing relative to financial results, and whether the incoming auditor is of similar standing.",
+    relevanceNote: "Apply whenever an auditor change is noted. A change following a management dispute, qualification or regulatory inquiry carries more weight than routine rotation.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Distinguish mandatory rotation (regulatory requirement) from voluntary change or resignation. A resignation mid-year or shortly before results is more significant than a scheduled change.",
+  },
+  {
+    checkKey: "restatements",
+    category: "auditor",
+    description: "Identify whether prior-period financial statements were restated, the magnitude of the restatement, and the stated reason. Assess whether the restatement affects the investment thesis materially.",
+    relevanceNote: "Apply whenever current-year accounts include restated prior-year comparatives that differ from previously published figures.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Determine whether the restatement relates to an error, a regulatory correction, or a genuine reassessment. Magnitude and pattern (repeated restatements) determine severity.",
+  },
+  {
+    checkKey: "internal_control_weaknesses",
+    category: "auditor",
+    description: "Identify material weaknesses in internal financial controls reported by the auditor or management, and assess whether they have been remediated in subsequent periods.",
+    relevanceNote: "Apply when the auditor report contains qualifications, emphasis of matter paragraphs, or an adverse opinion on internal controls.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Assess the nature of the weakness (process gap vs. systematic failure), whether it is isolated or pervasive, and whether management has a credible remediation plan.",
+  },
+  {
+    checkKey: "fraud_whistleblower",
+    category: "auditor",
+    description: "Investigate whether there are disclosed whistleblower complaints, suspected fraud, accounting irregularities, regulatory investigations or SEBI/MCA/SFIO actions related to financial reporting.",
+    relevanceNote: "Apply only when such disclosures exist in the annual report, stock exchange filings or credible public domain. Do not speculate.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Distinguish substantiated findings from unresolved allegations. Assess management response, board audit committee action and regulatory outcome.",
+  },
+
+  // ── CONSOLIDATED ANALYSIS ────────────────────────────────────
+  {
+    checkKey: "minority_interest_quality",
+    category: "consolidated",
+    description: "Assess how much of consolidated PAT belongs to shareholders of the parent versus minority (non-controlling) interests. Evaluate whether PAT attributable to the parent is growing in line with headline consolidated numbers.",
+    relevanceNote: "Apply to all companies with material subsidiaries. Critical for conglomerates, holding companies and groups with joint ventures.",
+    notAutomaticRedFlag: true,
+    contextRequired: "A high minority interest share is not inherently bad — it reflects partial ownership. The concern arises when profit attributable to the parent grows slowly despite strong consolidated numbers, or when structure shifts profitable entities away from the listed parent.",
+  },
+  {
+    checkKey: "subsidiary_earnings_drivers",
+    category: "consolidated",
+    description: "Identify which subsidiaries, joint ventures or associates are driving consolidated earnings. Assess whether those entities are generating real cash or primarily contributing accounting profits (equity accounting, unrealised fair value gains).",
+    relevanceNote: "Apply when the group has material subsidiaries, associates or JVs whose profitability is consolidated but whose cash dividends to the parent are limited.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Compare dividends received from associates/JVs with the equity-accounted profit recognised. A large and growing gap between accounted profit and cash received warrants scrutiny.",
+  },
+  {
+    checkKey: "subsidiary_capital_consumption",
+    category: "consolidated",
+    description: "Assess whether subsidiaries or JVs are consuming disproportionate amounts of capital relative to the returns they generate. Identify intra-group loans, capital infusions and guarantees.",
+    relevanceNote: "Apply when the group has multiple subsidiaries with independent balance sheets, or when intra-group transactions are material.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Capital infusion into a new business in investment phase is structurally different from repeated infusions into a loss-making legacy entity. Assess strategic rationale and time-to-return.",
+  },
+
+  // ── CAPITAL ALLOCATION ───────────────────────────────────────
+  {
+    checkKey: "incremental_roce",
+    category: "capital_allocation",
+    description: "Compute incremental ROCE or ROIC — the return generated on capital deployed in the most recent period, not the historical average. Assess whether new capital is being deployed as productively as existing capital.",
+    relevanceNote: "Apply to all capital-intensive businesses. Especially important during expansion phases where absolute returns may look stable but marginal returns are declining.",
+    notAutomaticRedFlag: true,
+    contextRequired: "A declining incremental ROCE during heavy investment in a genuinely high-growth opportunity is different from declining returns on mature assets. Assess the business rationale and expected return timeline.",
+  },
+  {
+    checkKey: "acquisition_value",
+    category: "capital_allocation",
+    description: "Assess whether acquisitions have created or destroyed shareholder value. Examine the acquisition price, goodwill recognised, subsequent impairments and whether acquired businesses have met their original rationale.",
+    relevanceNote: "Apply whenever the company has made material acquisitions. Goodwill impairment, integration charges and post-acquisition margin deterioration are investigative signals.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Distinguish strategic acquisitions with a clear long-term rationale (and adequate time to assess) from acquisitions that have already underperformed their stated thesis over a reasonable period.",
+  },
+  {
+    checkKey: "retained_cash_deployment",
+    category: "capital_allocation",
+    description: "Assess whether retained earnings and free cash flow are being deployed productively. Evaluate the split between reinvestment, acquisitions, debt repayment, dividends and buybacks, and whether each deployment has generated adequate returns.",
+    relevanceNote: "Apply to cash-generative businesses where the balance sheet has accumulated significant cash or investments, or when dividend or buyback policy has changed.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Retained cash on the balance sheet is not automatically inefficient. A company saving for a capex cycle or avoiding forced fundraising at bad terms is rational. Assess deployment against stated strategy.",
+  },
+
+  // ── SHAREHOLDER ECONOMICS ────────────────────────────────────
+  {
+    checkKey: "share_count_dilution",
+    category: "shareholder_economics",
+    description: "Investigate whether the number of outstanding shares has increased materially. Identify the mechanism: QIPs, preferential allotments, warrants, convertible instruments, ESOPs, rights issues or bonus shares with offsetting equity reduction.",
+    relevanceNote: "Apply whenever the share count has changed materially year-over-year or when the company has issued QIPs, warrants or convertibles.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Assess the purpose (growth capital with a clear use of funds vs. dilution to repay debt or fund losses), the pricing relative to market, and whether the board has been transparent about dilution to existing shareholders.",
+  },
+  {
+    checkKey: "eps_vs_pat",
+    category: "shareholder_economics",
+    description: "Compare EPS growth against PAT growth. A significant and persistent gap indicates dilution: total profit is growing but the per-share economic interest of existing shareholders is growing more slowly.",
+    relevanceNote: "Apply whenever PAT growth and EPS growth diverge by more than a few percentage points in the same period.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Distinguish dilution from ESOP exercises (gradual, disclosed) from large equity issuances that materially reset the share base. Assess whether the capital raised generated returns adequate to compensate existing shareholders.",
+  },
+
+  // ── MANAGEMENT ───────────────────────────────────────────────
+  {
+    checkKey: "management_explanation_consistency",
+    category: "management",
+    description: "Assess whether management's explanation for the same past event has changed over time across quarterly calls, annual reports and investor presentations. Inconsistent explanations of what went wrong in prior periods reduce credibility.",
+    relevanceNote: "Apply when tracking management commentary across multiple periods. Requires comparing current explanations with prior-period transcripts or disclosures.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Distinguish genuine new information that legitimately changes the explanation from post-hoc rationalisation of missed targets. Pattern across multiple periods matters more than a single revision.",
+  },
+  {
+    checkKey: "management_failure_transparency",
+    category: "management",
+    description: "Assess whether management acknowledges missed targets, business failures and unfavourable developments transparently, or whether disclosures are consistently framed to minimise negatives.",
+    relevanceNote: "Apply by reviewing language in results presentations, annual report MD&As and investor call transcripts. Consistent blame-shifting or omission of missed metrics is a signal.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Management that acknowledges errors and explains the corrective action is more credible than management that never reports a failure. Look for pattern, not isolated instances.",
+  },
+  {
+    checkKey: "management_remuneration_alignment",
+    category: "management",
+    description: "Assess whether management remuneration (salary, commission, variable pay, ESOPs) is aligned with long-term shareholder returns rather than short-term accounting metrics.",
+    relevanceNote: "Apply when promoter or professional management remuneration is material relative to PAT, or when remuneration has grown significantly faster than earnings or shareholder returns.",
+    notAutomaticRedFlag: true,
+    contextRequired: "High absolute remuneration is not automatically problematic — context is competitive labour market, company scale and shareholder returns delivered. The concern is remuneration rising while shareholder returns deteriorate, or remuneration tied only to revenue or EBITDA rather than ROIC or per-share value.",
+  },
+
+  // ── CONTINGENT LIABILITIES ───────────────────────────────────
+  {
+    checkKey: "contingent_liability_materiality",
+    category: "contingent_liabilities",
+    description: "Assess whether disclosed contingent liabilities (tax demands, legal disputes, guarantees, environmental claims, regulatory penalties) are material relative to the company's net worth, free cash flow and debt capacity.",
+    relevanceNote: "Apply when contingent liabilities are disclosed in the notes. Always assess size relative to financial capacity, not in absolute rupee terms alone.",
+    notAutomaticRedFlag: true,
+    contextRequired: "A contingent liability of ₹500 crore is immaterial for a company with ₹50,000 crore net worth but serious for one with ₹1,000 crore. Assess the nature of the dispute, management's historical win/loss rate and provisions already made.",
+  },
+  {
+    checkKey: "contingent_liability_crystallisation",
+    category: "contingent_liabilities",
+    description: "For material contingent liabilities, assess the probability and likely timeline of crystallisation into actual cash outflows. Identify whether the company has made adequate provisions and whether adverse outcomes would require external financing.",
+    relevanceNote: "Apply when contingent liabilities are material. Requires reading the legal/tax notes and auditor comments, not just the headline figure.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Distinguish well-established tax demands at a routine appellate stage (typically low crystallisation probability) from liabilities where adverse outcomes have already been determined at lower tribunals.",
+  },
+
+  // ── LONG-TERM INVESTMENT ─────────────────────────────────────
+  {
+    checkKey: "incremental_roic_trajectory",
+    category: "long_term",
+    description: "Assess whether incremental return on invested capital (ROIC) is improving or deteriorating over a multi-year period. A declining incremental ROIC despite growing absolute profit indicates capital is being deployed at diminishing returns.",
+    relevanceNote: "Apply over a multi-year period — at least 3 to 5 years of data. Not useful on a single-year basis.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Distinguish a temporary dip during a deliberate investment phase (where ROIC is expected to recover) from a structural deterioration with no credible recovery thesis. Management's stated return expectations must be compared to what has been delivered historically.",
+  },
+  {
+    checkKey: "competitive_advantage_trajectory",
+    category: "long_term",
+    description: "Assess whether the company's competitive advantage (pricing power, cost position, network effects, regulatory moat, switching costs, brand) is strengthening or weakening. Use observable evidence: market share trends, margin trends relative to peers, customer retention.",
+    relevanceNote: "Apply in the outlook and industry sections. Requires peer context and multi-year data.",
+    notAutomaticRedFlag: true,
+    contextRequired: "A temporarily weaker margin during an investment cycle is not the same as permanent competitive erosion. Look for durable structural signals: entry of a well-funded new competitor, commoditisation of a differentiated product, regulatory changes removing a moat.",
+  },
+  {
+    checkKey: "thesis_invalidation_evidence",
+    category: "long_term",
+    description: "Explicitly identify what evidence would invalidate or materially weaken the current investment thesis for this company. State the conditions: if X happens, the thesis breaks. Then assess whether any of those conditions are emerging.",
+    relevanceNote: "Apply in the investor takeaway section for long-term oriented analysis. The AI must be able to articulate what would make it wrong.",
+    notAutomaticRedFlag: true,
+    contextRequired: "Thesis invalidation conditions must be specific to this company and its industry — not generic risk statements. Generic risks that apply to every company (inflation, recession, regulation) are not useful thesis invalidation criteria.",
+  },
+];
+
+/**
+ * Returns the universal research checks.
+ * These apply to every company regardless of industry framework.
+ * The AI must evaluate relevance before applying each check.
+ */
+export function getResearchChecks(): ResearchCheck[] {
+  return UNIVERSAL_RESEARCH_CHECKS;
+}
+
+/**
+ * Returns research checks filtered to a specific category.
+ */
+export function getResearchChecksByCategory(
+  category: ResearchCheckCategory,
+): ResearchCheck[] {
+  return UNIVERSAL_RESEARCH_CHECKS.filter((c) => c.category === category);
 }

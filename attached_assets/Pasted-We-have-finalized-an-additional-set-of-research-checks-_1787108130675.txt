@@ -1,0 +1,113 @@
+We have finalized an additional set of research checks for the AI equity research engine.
+
+IMPORTANT:
+- Do NOT create a new database/schema.
+- Do NOT delete or replace the existing research framework.
+- Do NOT duplicate questions/rules that are already covered.
+- Integrate ONLY the genuinely new analytical checks below into the existing framework.
+- These are INTERNAL AI RESEARCH RULES. They must NOT appear as questions in the user-facing report.
+- The AI should investigate these when relevant to the company, industry and situation.
+- Do not mechanically flag something as a red flag. Context, materiality, duration and evidence must determine the conclusion.
+
+ADD THESE NEW CHECKS:
+
+1. ACCOUNTING
+- Did the company change accounting policies or material accounting estimates?
+- Did changes in depreciation, useful lives, revenue recognition or other accounting estimates materially affect reported earnings?
+- How much reported profit comes from exceptional/non-recurring items?
+- How much profit comes from other income rather than the core business?
+
+2. AUDITOR
+- Did the auditor change or resign? If so, investigate the reason and circumstances.
+- Were previous-year financial statements restated?
+- Are there material internal-control weaknesses?
+- Are there whistleblower complaints, suspected fraud or accounting irregularities?
+
+3. CONSOLIDATED ANALYSIS
+- How much consolidated profit belongs to shareholders of the parent versus non-controlling/minority interests?
+- Which subsidiaries, JVs or associates are driving consolidated earnings?
+- Are those subsidiaries generating cash or mainly contributing accounting profits?
+- Are subsidiaries/JVs consuming disproportionate amounts of capital?
+
+4. CAPITAL ALLOCATION
+- What return is the company generating on incremental capital, not just historical capital?
+- Have acquisitions created or destroyed shareholder value?
+- Is retained cash being deployed productively?
+
+5. SHAREHOLDER ECONOMICS
+- Has the number of outstanding shares increased materially?
+- Are QIPs, warrants, convertibles, ESOPs or preferential issues diluting existing shareholders?
+- Is EPS growth keeping pace with PAT growth?
+
+6. MANAGEMENT
+- Has management's explanation for important past events changed over time?
+- Does management acknowledge failures and missed targets transparently?
+- Are management incentives and remuneration aligned with long-term shareholder returns?
+
+7. CONTINGENT LIABILITIES
+- Are contingent liabilities material relative to the company's financial capacity?
+- What is the likelihood that a material contingent liability becomes an actual cash outflow?
+
+8. LONG-TERM INVESTMENT
+- Is incremental ROCE/ROIC improving or deteriorating?
+- Is the company's competitive advantage strengthening or weakening?
+- What evidence would invalidate or materially weaken the current investment thesis?
+
+CRITICAL BEHAVIOUR:
+
+The AI must first understand the company, business model, industry,
+strategy and financial structure.
+
+It must then decide which of these checks are actually relevant.
+
+Do not force every check onto every company.
+
+Do not create a red flag merely because a condition exists.
+Investigate context and materiality first.
+
+Example:
+A one-time exceptional gain is not automatically a red flag.
+An auditor change is not automatically a red flag.
+High promoter remuneration is not automatically a red flag.
+A contingent liability is not automatically a red flag.
+
+The AI must investigate and explain why something matters.
+
+FINANCIAL BASIS INTEGRITY:
+
+For every financial analysis, preserve:
+- entity
+- standalone/consolidated basis
+- reporting period
+- metric
+- source
+
+Never mix standalone and consolidated figures in a calculation.
+
+For peer analysis, normalize the reporting basis and period before
+comparison. If a clean comparison cannot be made, do not manufacture one.
+
+The appropriate basis must be determined by the analytical question,
+company structure and industry—not by a blanket rule.
+
+USER-FACING OUTPUT:
+
+Do NOT display these questions to the user.
+
+The questions/checks are internal research instructions only.
+
+The final website should show only the conclusions, evidence-backed
+explanations, relevant risks, positive developments and investor
+takeaway.
+
+Keep the final report crisp and efficient. It may be lengthy when the
+company genuinely requires it, but remove unnecessary commentary.
+
+Before making changes, inspect the existing research framework and
+integrate these checks without duplicating existing rules.
+
+After completing the integration:
+1. Tell me which new rules/checks were added.
+2. Tell me which ones were already covered and therefore not duplicated.
+3. Confirm that the existing database/schema and functionality were not broken.
+4. Do not build the actual company-data ingestion system yet.
