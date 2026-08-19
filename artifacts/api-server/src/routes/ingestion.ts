@@ -380,7 +380,15 @@ ingestionRouter.post("/extract-pdf", async (req: Request, res: Response) => {
         try {
           const rows = JSON.parse(storeText) as Array<{ id: string }>;
           documentId = rows[0]?.id ?? null;
-        } catch { documentId = null; }
+          if (!documentId) {
+            docStorageError = "Supabase document insert returned no document ID";
+            logger.error({ docStorageError, url, response: storeText.slice(0, 300) }, "Document row storage returned no ID");
+          }
+        } catch (parseError) {
+          documentId = null;
+          docStorageError = `Could not parse Supabase document insert response: ${String(parseError)}; response: ${storeText.slice(0, 300)}`;
+          logger.error({ docStorageError, url }, "Document row storage response parsing failed");
+        }
       } else {
         docStorageError = `HTTP ${storeResp.status}: ${storeText.slice(0, 300)}`;
         logger.error({ docStorageError, url }, "Document row storage failed");
@@ -388,6 +396,8 @@ ingestionRouter.post("/extract-pdf", async (req: Request, res: Response) => {
     } else {
       docStorageError = "Supabase not configured";
     }
+
+    const documentStorageFailure = !documentId;
 
     // ── 4. Store ALL chunks (only if document row was created) ─
     let chunkResult = { totalChunks: 0, storedChunks: 0, failedChunks: 0, errors: [] as string[] };
@@ -400,10 +410,13 @@ ingestionRouter.post("/extract-pdf", async (req: Request, res: Response) => {
     }
 
     // ── 5. Return structured report ────────────────────────────
-    res.json({
-      status: extraction.success
-        ? (chunkResult.failedChunks === 0 ? "success" : "partial_chunk_failure")
-        : extraction.extractionStatus,
+    res.status(documentStorageFailure ? 502 : 200).json({
+      status: documentStorageFailure
+        ? "storage_failure"
+        : extraction.success
+          ? (chunkResult.failedChunks === 0 ? "success" : "partial_chunk_failure")
+          : extraction.extractionStatus,
+      error: documentStorageFailure ? "Document could not be persisted" : null,
 
       extraction: {
         tool: "pdftotext (poppler-utils — pre-installed in Replit environment)",
@@ -436,7 +449,7 @@ ingestionRouter.post("/extract-pdf", async (req: Request, res: Response) => {
         documentStored: documentId !== null,
         chunksStored: chunkResult.storedChunks,
         dbExtractionStatus: dbStatus,
-        docStorageError: docStorageError ?? null,
+        docStorageError: docStorageError ?? (documentStorageFailure ? "Document insert did not return a document ID" : null),
         retrievalEndpoints: documentId ? {
           allChunks: `/api/ingestion/chunks/${documentId}`,
           pageRange: `/api/ingestion/chunks/${documentId}?pageFrom=5&pageTo=10`,
