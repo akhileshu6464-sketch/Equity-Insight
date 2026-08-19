@@ -1,0 +1,341 @@
+REDESIGN THE USER-FACING EXPERIENCE AROUND THE CORE PRODUCT IDEA.
+
+IMPORTANT:
+The core product is NOT "AI equity research questions".
+The core product is NOT a financial dashboard.
+The core product is NOT a charting platform.
+
+The product promise is:
+
+"Type a stock name once. Get everything an investor needs to know about that company in one place, without reading the entire annual report or visiting 10 different websites."
+
+The investor should be able to understand the important developments,
+business, financials, industry, management, risks, shareholders,
+valuation and other relevant information quickly.
+
+The existing research questions/checklists are INTERNAL AI RESEARCH
+INSTRUCTIONS. NEVER display those questions to the user.
+
+DO NOT change:
+- Supabase database
+- research framework
+- data ingestion architecture
+- accounting-basis rules
+- evidence system
+- peer normalization
+- API architecture
+
+ONLY redesign the current user-facing UI/UX.
+
+==================================================
+1. HOMEPAGE
+==================================================
+
+Make the homepage extremely simple.
+
+Hero:
+
+"Research any stock in minutes."
+
+Subheading:
+
+"Stop reading hundreds of pages and searching across multiple
+websites. Search a company and get the important information,
+developments, risks and investor insights in one place."
+
+Large search box:
+
+"Search company name or ticker"
+
+Example:
+Reliance Industries / RELIANCE
+
+Do not fill the homepage with:
+- charts
+- financial dashboards
+- complicated filters
+- technical indicators
+- dozens of metrics
+
+The primary action should be:
+SEARCH COMPANY.
+
+==================================================
+2. COMPANY PAGE
+==================================================
+
+When the user searches a company, the first thing they should see
+must be a highly readable SUMMARY.
+
+Header:
+
+COMPANY NAME
+Ticker | Exchange | Sector | Industry
+
+Then create:
+
+"THE QUICK VIEW"
+
+This is NOT a list of questions.
+
+It should contain concise conclusions such as:
+
+WHAT'S HAPPENING
+A short explanation of the most important things currently
+happening in the company.
+
+WHY IT MATTERS
+Explain why those developments matter to an investor.
+
+BIGGEST POSITIVE
+The most important positive development supported by evidence.
+
+BIGGEST CONCERN
+The most important concern supported by evidence.
+
+WHAT TO WATCH
+The 2–4 most important things investors should monitor.
+
+INVESTOR TAKEAWAY
+A concise synthesis of the company's current situation.
+
+This section should feel like a very good equity analyst explaining
+the company to another investor.
+
+==================================================
+3. FULL COMPANY RESEARCH
+==================================================
+
+Below the Quick View, show the deeper research in clear sections:
+
+BUSINESS
+Explain what the company actually does, its major businesses,
+revenue/profit drivers and business strategy.
+
+WHAT CHANGED
+Show the important developments from recent quarters/periods.
+
+FINANCIALS
+Explain:
+- revenue growth
+- profitability
+- margins
+- EPS
+- important changes
+- what is driving the numbers
+
+Do not dump financial statements on the user.
+
+Explain what the numbers MEAN.
+
+CASH FLOW & BALANCE SHEET
+Explain:
+- cash generation
+- working capital
+- debt
+- leverage
+- capex
+- important balance-sheet changes
+
+INDUSTRY
+Explain:
+- industry conditions
+- industry cycle
+- demand/supply
+- relevant structural changes
+- how these affect this specific company
+
+MANAGEMENT
+Explain:
+- management strategy
+- important guidance
+- promises/targets
+- whether previous guidance was delivered
+- important changes in management commentary
+
+SHAREHOLDERS
+Explain:
+- promoter holding changes
+- pledging
+- institutional ownership changes
+- major shareholder developments
+- dilution
+
+GOVERNANCE & RELATED PARTIES
+Only highlight things that are actually material.
+
+PEERS
+Explain where the company is stronger/weaker than relevant peers.
+
+IMPORTANT:
+Never compare incompatible standalone/consolidated figures.
+Normalize the basis before presenting peer conclusions.
+
+VALUATION
+Explain the relevant valuation metrics for this company's industry
+and what the current valuation appears to imply.
+
+RISKS & RED FLAGS
+Only show evidence-backed concerns.
+
+Do NOT mechanically label something a red flag merely because a
+checklist condition exists.
+
+POSITIVE DEVELOPMENTS
+Show meaningful improvements or positive developments supported by
+evidence.
+
+==================================================
+4. USER EXPERIENCE
+==================================================
+
+The user should NOT feel like they are reading an annual report.
+
+The experience should feel like:
+
+"I searched Reliance and someone already did the research for me."
+
+Use:
+- short paragraphs
+- clear headings
+- bold important conclusions
+- expandable deeper sections where appropriate
+- simple language
+- investor-friendly explanations
+
+Avoid:
+- huge tables
+- unnecessary charts
+- technical jargon without explanation
+- repetitive information
+- generic AI statements
+- unnecessary disclaimers throughout the page
+- showing internal research questions
+
+The report can be long when the company genuinely requires it,
+but every paragraph must add useful information.
+
+==================================================
+5. EVIDENCE
+==================================================
+
+Where the system has evidence available, allow the user to see the
+source behind an important claim.
+
+Example:
+
+"Receivables increased significantly faster than revenue."
+
+[Source: FY26 Annual Report]
+
+Do not expose internal database structure or technical evidence
+metadata to normal users.
+
+The source should be accessible through a small "Source" or
+"See source" interaction.
+
+==================================================
+6. ACCOUNTING BASIS
+==================================================
+
+The user-facing report must clearly distinguish:
+
+CONSOLIDATED
+STANDALONE
+
+The AI should primarily explain the group-level economic picture
+using consolidated information where appropriate, but it must select
+the correct basis for each analytical question.
+
+Never mix the two.
+
+If a figure is standalone, clearly label it when material.
+
+If consolidated and standalone figures materially differ, explain
+why that difference matters.
+
+==================================================
+7. IMPORTANT DESIGN PRINCIPLE
+==================================================
+
+The complexity should be BEHIND THE SCREEN.
+
+The AI may internally analyze hundreds of questions/checks.
+
+The investor should see only:
+
+WHAT HAPPENED
+WHY IT MATTERS
+WHAT IS GOOD
+WHAT IS BAD
+WHAT TO WATCH
+WHAT THE NUMBERS MEAN
+WHAT MANAGEMENT IS DOING
+WHAT COULD GO WRONG
+WHAT THE MARKET MAY BE EXPECTING
+FINAL INVESTOR TAKEAWAY
+
+Do not show the underlying checklist.
+
+==================================================
+8. RELIANCE DEMO
+==================================================
+
+Use the existing Reliance demo data/content.
+
+Do not invent new financial information.
+
+Redesign the existing Reliance page so that it demonstrates the
+above experience.
+
+The first screen should immediately communicate:
+
+"Here is what you need to know about Reliance."
+
+NOT:
+
+"Here are 30 financial metrics."
+
+==================================================
+9. VISUAL STYLE
+==================================================
+
+Keep the design modern, clean and premium.
+
+Prioritize:
+- readability
+- whitespace
+- typography
+- hierarchy
+- easy scanning
+
+Do not make it look like:
+- a Bloomberg terminal
+- a trading platform
+- a Screener clone
+- a complicated financial dashboard
+
+The product should feel like a premium investment research
+intelligence platform.
+
+==================================================
+10. IMPORTANT IMPLEMENTATION RULE
+==================================================
+
+Before making changes, inspect the existing UI.
+
+Preserve existing functionality.
+
+Do not modify backend/database/research logic.
+
+Only change the presentation and user experience.
+
+After completing the redesign:
+- run TypeScript checks
+- verify the existing Reliance page works
+- verify company search still works
+- verify no backend functionality was broken
+- report exactly what UI files were changed
+
+STOP after completing this task.
+Do not start another feature.
