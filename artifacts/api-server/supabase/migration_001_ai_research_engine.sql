@@ -56,8 +56,15 @@ alter table public.industry_frameworks enable row level security;
 --    Every AI conclusion must be backed by a stored evidence
 --    record.  The AI must choose FACT / INFERENCE / UNCERTAIN.
 -- ─────────────────────────────────────────────────────────────
-create type if not exists public.evidence_type as enum ('FACT', 'INFERENCE', 'UNCERTAIN');
-create type if not exists public.confidence_level as enum ('HIGH', 'MEDIUM', 'LOW');
+do $$ begin
+  create type public.evidence_type as enum ('FACT', 'INFERENCE', 'UNCERTAIN');
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.confidence_level as enum ('HIGH', 'MEDIUM', 'LOW');
+exception when duplicate_object then null;
+end $$;
 
 create table if not exists public.analysis_evidence (
   id                 uuid primary key default gen_random_uuid(),
@@ -88,8 +95,15 @@ alter table public.analysis_evidence enable row level security;
 --    Flags contradictions across P&L, cash flow, balance sheet,
 --    management commentary and market data.
 -- ─────────────────────────────────────────────────────────────
-create type if not exists public.cross_check_result as enum ('PASS', 'FLAG', 'WARN', 'INSUFFICIENT_DATA');
-create type if not exists public.severity_level as enum ('LOW', 'MEDIUM', 'HIGH');
+do $$ begin
+  create type public.cross_check_result as enum ('PASS', 'FLAG', 'WARN', 'INSUFFICIENT_DATA');
+exception when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.severity_level as enum ('LOW', 'MEDIUM', 'HIGH');
+exception when duplicate_object then null;
+end $$;
 
 create table if not exists public.cross_checks (
   id                    uuid primary key default gen_random_uuid(),
@@ -120,7 +134,10 @@ alter table public.cross_checks enable row level security;
 --    Tracks the lifecycle of each analysis run so the pipeline
 --    can be resumed, retried, and audited.
 -- ─────────────────────────────────────────────────────────────
-create type if not exists public.job_status as enum ('PENDING', 'RUNNING', 'COMPLETE', 'FAILED');
+do $$ begin
+  create type public.job_status as enum ('PENDING', 'RUNNING', 'COMPLETE', 'FAILED');
+exception when duplicate_object then null;
+end $$;
 
 create table if not exists public.research_jobs (
   id                  uuid primary key default gen_random_uuid(),
