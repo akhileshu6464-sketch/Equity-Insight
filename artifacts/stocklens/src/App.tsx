@@ -36,19 +36,29 @@ const getBlocks = (text?: string) => {
 };
 
 const DEEPER_GROUPS = [
-  { id: 'business', label: 'Business', sections: ['company', 'business_model'] },
-  { id: 'what_changed', label: 'What Changed', sections: ['what_happened', 'stock_move'] },
-  { id: 'financials', label: 'Financials', sections: ['earnings'] },
-  { id: 'cash_flow', label: 'Cash Flow & Balance Sheet', sections: ['cash_flow'] },
+  { id: 'business', label: 'Business', sections: ['company'] },
+  { id: 'what_changed', label: 'What Changed', sections: ['what_happened'] },
+  { id: 'segments', label: 'Segment Analysis', sections: ['segments'] },
+  { id: 'financials', label: 'Financial Statements', sections: ['financial_statements'] },
+  { id: 'financial_trends', label: 'Five-Year Financial Trends', sections: ['financial_trends'] },
+  { id: 'ratios', label: 'Financial Ratios', sections: ['ratios'] },
+  { id: 'cash_flow', label: 'Cash Flow', sections: ['cash_flow'] },
+  { id: 'balance_sheet', label: 'Balance Sheet', sections: ['balance_sheet'] },
+  { id: 'receivables', label: 'Receivables', sections: ['receivables'] },
+  { id: 'inventory', label: 'Inventory', sections: ['inventory'] },
+  { id: 'payables', label: 'Payables', sections: ['payables'] },
+  { id: 'working_capital', label: 'Working Capital', sections: ['working_capital'] },
+  { id: 'debt', label: 'Debt & Liquidity', sections: ['debt'] },
   { id: 'industry', label: 'Industry', sections: ['industry'] },
   { id: 'management', label: 'Management', sections: ['management'] },
-  { id: 'risks', label: 'Risks & Red Flags', sections: ['what_is_going_wrong', 'red_flags', 'risks'] },
+  { id: 'outlook', label: 'Outlook & Guidance', sections: ['outlook'] },
+  { id: 'risks', label: 'Risks & Red Flags', sections: ['what_is_going_wrong'] },
   { id: 'positives', label: 'Positive Developments', sections: ['what_is_going_well'] },
   { id: 'takeaway', label: 'Investor Takeaway', sections: ['summary'] },
   { id: 'shareholders', label: 'Shareholders', sections: ['shareholders'] },
-  { id: 'governance', label: 'Governance & Related Parties', sections: ['governance'] },
-  { id: 'peers', label: 'Peers', sections: ['peers'] },
-  { id: 'valuation', label: 'Valuation', sections: ['valuation'] }
+  { id: 'governance', label: 'Governance & Auditor', sections: ['governance'] },
+  { id: 'related_parties', label: 'Related-Party Transactions', sections: ['related_parties'] },
+  { id: 'subsidiaries', label: 'Subsidiaries / JVs', sections: ['subsidiaries'] }
 ] as const;
 
 function Wordmark() {

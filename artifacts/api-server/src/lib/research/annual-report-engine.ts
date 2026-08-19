@@ -55,12 +55,6 @@ export async function runRelianceAnnualReportResearch() {
         .filter((section) => section.status === "COMPLETE")
         .map((section) => section.sectionKey),
     );
-    const requiredCoreSections = [
-      "business",
-      "financial",
-      "cash_balance_sheet",
-    ] as const;
-
     if (
       sections.length !== evidencePacks.length ||
       crossChecks.length !== source.databaseCrossCheckRules.length
@@ -68,9 +62,8 @@ export async function runRelianceAnnualReportResearch() {
       throw new Error("Annual-report evidence checks did not produce a complete result set");
     }
     if (
-      supportedConclusionCount < 12 ||
-      completedSectionKeys.size < 6 ||
-      requiredCoreSections.some((section) => !completedSectionKeys.has(section))
+      supportedConclusionCount < 24 ||
+      completedSectionKeys.size < 16
     ) {
       throw new Error(
         `Annual-report publication quality gate failed: ${supportedConclusionCount} supported conclusions across ${completedSectionKeys.size} complete sections`,

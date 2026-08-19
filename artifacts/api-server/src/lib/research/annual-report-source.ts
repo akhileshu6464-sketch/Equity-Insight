@@ -14,9 +14,21 @@ export const EXPECTED_PAGE_COUNT = 187;
 
 export const ANNUAL_REPORT_SECTION_KEYS = [
   "business",
+  "segments",
   "financial",
+  "financial_trends",
+  "ratios",
   "cash_balance_sheet",
+  "cash_flow",
+  "balance_sheet",
+  "receivables",
+  "inventory",
+  "payables",
+  "working_capital",
+  "debt",
   "management",
+  "outlook",
+  "industry",
   "related_parties",
   "governance",
   "shareholders",
@@ -128,6 +140,19 @@ const SECTION_QUERIES: Record<AnnualReportSectionKey, string[]> = {
     "segment revenue",
     "segment results",
   ],
+  segments: [
+    "Segment Revenue External Turnover",
+    "Segment Result before Interest and Taxes",
+    "Total Value of Sales and Services after elimination of inter segment turnover",
+    "segment revenue",
+    "segment results",
+    "Oil to Chemicals",
+    "Oil and Gas",
+    "Retail",
+    "Digital Services",
+    "Financial Services",
+    "segment assets",
+  ],
   financial: [
     "10-Year Financial Highlights",
     "Value of Sales and Services Revenue",
@@ -136,6 +161,23 @@ const SECTION_QUERIES: Record<AnnualReportSectionKey, string[]> = {
     "consolidated statement of profit and loss",
     "earnings per share",
     "Consolidated revenue grew",
+  ],
+  financial_trends: [
+    "10-Year Financial Highlights",
+    "Value of Sales and Services",
+    "Earnings Before Depreciation Finance Cost and Tax Expenses",
+    "Profit for the Year",
+    "Net Fixed Assets",
+    "Consolidated",
+  ],
+  ratios: [
+    "Current Ratio",
+    "Debt-Equity Ratio",
+    "Debt:Equity Ratio",
+    "EBITDA/Gross Turnover",
+    "Net Profit Margin",
+    "Return on Net Worth",
+    "ROCE",
   ],
   cash_balance_sheet: [
     "consolidated statement of cash flows",
@@ -149,6 +191,66 @@ const SECTION_QUERIES: Record<AnnualReportSectionKey, string[]> = {
     "Borrowings Non-Current",
     "working capital",
   ],
+  cash_flow: [
+    "consolidated statement of cash flows",
+    "Net Cash Flow from Operating Activities",
+    "Net Cash Flow from Investing Activities",
+    "Net Cash Flow from Financing Activities",
+    "Net Increase in Cash and Cash Equivalents",
+    "capital expenditure",
+  ],
+  balance_sheet: [
+    "consolidated balance sheet",
+    "total assets",
+    "total equity",
+    "current assets",
+    "current liabilities",
+    "Cash and Cash Equivalents as per Balance Sheet",
+    "Net Fixed Assets",
+  ],
+  receivables: [
+    "Trade Receivables 8",
+    "trade receivables",
+    "receivables",
+    "expected credit loss",
+    "ageing schedule",
+    "credit risk",
+  ],
+  inventory: [
+    "Inventories 6",
+    "inventories",
+    "inventory",
+    "raw materials",
+    "stock in trade",
+    "inventory valuation",
+  ],
+  payables: [
+    "Trade Payables Due to Micro and Small Enterprises",
+    "trade payables",
+    "payables",
+    "micro small and medium enterprises",
+    "supplier",
+    "creditors",
+  ],
+  working_capital: [
+    "Operating Profit before Working Capital Changes Inventories",
+    "working capital",
+    "trade receivables",
+    "inventories",
+    "trade payables",
+    "current assets",
+    "current liabilities",
+    "current ratio",
+  ],
+  debt: [
+    "Consolidated Net Debt",
+    "borrowings",
+    "Debt-Equity Ratio",
+    "Debt:Equity Ratio",
+    "finance cost",
+    "interest coverage",
+    "foreign currency borrowings",
+  ],
   management: [
     "chairman's statement",
     "strategic priorities",
@@ -157,6 +259,27 @@ const SECTION_QUERIES: Record<AnnualReportSectionKey, string[]> = {
     "target",
     "guidance",
     "outlook",
+  ],
+  outlook: [
+    "FY 2026-27 outlook remains",
+    "outlook",
+    "strategic priorities",
+    "growth opportunities",
+    "new energy",
+    "investment priorities",
+    "target",
+    "guidance",
+  ],
+  industry: [
+    "Global economic expansion continued",
+    "Operating Environment",
+    "market demand",
+    "industry",
+    "commodity prices",
+    "regulatory",
+    "competition",
+    "digital services",
+    "retail",
   ],
   related_parties: [
     "related party disclosures",
@@ -214,6 +337,27 @@ const SECTION_QUERIES: Record<AnnualReportSectionKey, string[]> = {
     "operational performance",
     "market leadership",
   ],
+};
+
+const FINANCIAL_BASIS_SECTION_KEYS = new Set<AnnualReportSectionKey>([
+  "financial",
+  "financial_trends",
+  "ratios",
+  "cash_balance_sheet",
+  "cash_flow",
+  "balance_sheet",
+  "receivables",
+  "inventory",
+  "payables",
+  "working_capital",
+  "debt",
+  "segments",
+]);
+
+const REQUIRED_ANCHOR_CHUNK_INDEXES: Partial<
+  Record<AnnualReportSectionKey, number[]>
+> = {
+  industry: [44],
 };
 
 const STOP_WORDS = new Set([
@@ -294,7 +438,7 @@ function selectSectionChunks(
   const selected = new Map<number, AnnualReportChunk>();
   const queries = SECTION_QUERIES[sectionKey];
 
-  if (sectionKey === "financial" || sectionKey === "cash_balance_sheet") {
+  if (FINANCIAL_BASIS_SECTION_KEYS.has(sectionKey)) {
     const basisAnchors = source.contentChunks
       .map((chunk) => ({
         chunk,
@@ -597,6 +741,9 @@ export function retrieveAnnualReportEvidence(
   return ANNUAL_REPORT_SECTION_KEYS.map((sectionKey) => {
     const units = selectEvidenceUnits(candidates, sectionKey);
     const chunkIndexes = new Set(units.map((unit) => unit.chunkIndex));
+    for (const chunkIndex of REQUIRED_ANCHOR_CHUNK_INDEXES[sectionKey] ?? []) {
+      chunkIndexes.add(chunkIndex);
+    }
     const chunks = source.contentChunks.filter((chunk) =>
       chunkIndexes.has(chunk.chunkIndex),
     );

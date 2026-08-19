@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { logger } from "../logger.js";
 import {
+  ANNUAL_REPORT_SECTION_KEYS,
   RELIANCE_COMPANY_ID,
   RELIANCE_REPORTING_PERIOD,
   type AnnualReportSource,
@@ -236,9 +237,20 @@ function buildResearchRows(
   };
 
   const business = requireSection("business");
+  const segments = requireSection("segments");
   const financial = requireSection("financial");
-  const cashBalance = requireSection("cash_balance_sheet");
+  const financialTrends = requireSection("financial_trends");
+  const ratios = requireSection("ratios");
+  const cashFlow = requireSection("cash_flow");
+  const balanceSheet = requireSection("balance_sheet");
+  const receivables = requireSection("receivables");
+  const inventory = requireSection("inventory");
+  const payables = requireSection("payables");
+  const workingCapital = requireSection("working_capital");
+  const debt = requireSection("debt");
   const management = requireSection("management");
+  const outlook = requireSection("outlook");
+  const industry = requireSection("industry");
   const relatedParties = requireSection("related_parties");
   const governance = requireSection("governance");
   const shareholders = requireSection("shareholders");
@@ -247,111 +259,99 @@ function buildResearchRows(
   const positives = requireSection("positives");
   const quick = quickView.items;
   const lastUpdated = nowIso();
+  const researchRow = (section: string, title: string, content: string) => ({
+    company_id: RELIANCE_COMPANY_ID,
+    section,
+    title,
+    content,
+    last_updated: lastUpdated,
+  });
 
   return [
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "company",
-      title: "Business",
-      content: renderSectionContent(business),
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "business_model",
-      title: "Subsidiaries and Joint Ventures",
-      content: renderSectionContent(subsidiaries),
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "what_happened",
-      title: "Current Direction",
-      content: `${renderQuickViewItem(quick.whatIsHappening)}\n\nWHY IT MATTERS\n${renderQuickViewItem(quick.whatMattersMost)}`,
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "earnings",
-      title: "Financial Performance",
-      content: renderSectionContent(financial),
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "cash_flow",
-      title: "Cash Flow & Balance Sheet",
-      content: renderSectionContent(cashBalance),
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "management",
-      title: "Management & Strategy",
-      content: renderSectionContent(management),
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "shareholders",
-      title: "Shareholders & Ownership",
-      content: renderSectionContent(shareholders),
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "governance",
-      title: "Governance, Auditor & Related Parties",
-      content: combineSections(
-        "Governance & Auditor",
-        governance,
-        "Related-Party Transactions",
-        relatedParties,
-      ),
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "related_parties",
-      title: "Related-Party Transactions",
-      content: renderSectionContent(relatedParties),
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "subsidiaries",
-      title: "Subsidiaries / JVs",
-      content: renderSectionContent(subsidiaries),
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "what_is_going_wrong",
-      title: "Material Risks",
-      content: `${renderQuickViewItem(quick.biggestConcern)}\n\n${renderSectionContent(risks)}`,
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "what_is_going_well",
-      title: "Positive Developments",
-      content: `${renderQuickViewItem(quick.biggestPositive)}\n\n${renderSectionContent(positives)}`,
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "what_to_watch",
-      title: "What Investors Should Monitor",
-      content: renderQuickViewItem(quick.whatToWatch),
-      last_updated: lastUpdated,
-    },
-    {
-      company_id: RELIANCE_COMPANY_ID,
-      section: "summary",
-      title: "Investor Takeaway",
-      content: `${renderQuickViewItem(quick.investorTakeaway)}\n\nNo buy, sell, or hold recommendation is provided because valuation and current market expectations are outside this phase.`,
-      last_updated: lastUpdated,
-    },
+    researchRow("company", "Business", renderSectionContent(business)),
+    researchRow(
+      "what_happened",
+      "Current Direction",
+      `${renderQuickViewItem(quick.whatIsHappening)}\n\nWHY IT MATTERS\n${renderQuickViewItem(quick.whatMattersMost)}`,
+    ),
+    researchRow("segments", "Segment Analysis", renderSectionContent(segments)),
+    researchRow(
+      "financial_statements",
+      "Financial Statements",
+      renderSectionContent(financial),
+    ),
+    researchRow(
+      "financial_trends",
+      "Five-Year Financial Trends",
+      renderSectionContent(financialTrends),
+    ),
+    researchRow("ratios", "Financial Ratios", renderSectionContent(ratios)),
+    researchRow("cash_flow", "Cash Flow", renderSectionContent(cashFlow)),
+    researchRow(
+      "balance_sheet",
+      "Balance Sheet",
+      renderSectionContent(balanceSheet),
+    ),
+    researchRow(
+      "receivables",
+      "Receivables",
+      renderSectionContent(receivables),
+    ),
+    researchRow("inventory", "Inventory", renderSectionContent(inventory)),
+    researchRow("payables", "Payables", renderSectionContent(payables)),
+    researchRow(
+      "working_capital",
+      "Working Capital",
+      renderSectionContent(workingCapital),
+    ),
+    researchRow("debt", "Debt & Liquidity", renderSectionContent(debt)),
+    researchRow(
+      "management",
+      "Management & Capital Allocation",
+      renderSectionContent(management),
+    ),
+    researchRow("outlook", "Outlook & Guidance", renderSectionContent(outlook)),
+    researchRow("industry", "Industry Context", renderSectionContent(industry)),
+    researchRow(
+      "shareholders",
+      "Shareholders & Ownership",
+      renderSectionContent(shareholders),
+    ),
+    researchRow(
+      "governance",
+      "Governance & Auditor",
+      renderSectionContent(governance),
+    ),
+    researchRow(
+      "related_parties",
+      "Related-Party Transactions",
+      renderSectionContent(relatedParties),
+    ),
+    researchRow(
+      "subsidiaries",
+      "Subsidiaries / JVs",
+      renderSectionContent(subsidiaries),
+    ),
+    researchRow(
+      "what_is_going_wrong",
+      "Material Risks",
+      `${renderQuickViewItem(quick.biggestConcern)}\n\n${renderSectionContent(risks)}`,
+    ),
+    researchRow(
+      "what_is_going_well",
+      "Positive Developments",
+      `${renderQuickViewItem(quick.biggestPositive)}\n\n${renderSectionContent(positives)}`,
+    ),
+    researchRow(
+      "what_to_watch",
+      "What Investors Should Monitor",
+      renderQuickViewItem(quick.whatToWatch),
+    ),
+    researchRow(
+      "summary",
+      "Investor Takeaway",
+      `${renderQuickViewItem(quick.investorTakeaway)}\n\nNo buy, sell, or hold recommendation is provided because valuation and current market expectations are outside this phase.`,
+    ),
   ];
 }
 
@@ -362,20 +362,7 @@ export async function createResearchJob() {
       company_id: RELIANCE_COMPANY_ID,
       status: "RUNNING",
       industry_type: "conglomerate",
-      sections_requested: [
-        "quick_view",
-        "business",
-        "financial",
-        "cash_balance_sheet",
-        "management",
-        "related_parties",
-        "governance",
-        "shareholders",
-        "subsidiaries",
-        "risks",
-        "positives",
-        "takeaway",
-      ],
+      sections_requested: ["quick_view", ...ANNUAL_REPORT_SECTION_KEYS, "takeaway"],
       sections_completed: [],
       sections_failed: [],
       error_message: null,

@@ -4,3 +4,4 @@
 - [NSE results API structure](nse-results-api.md) — results-comparision returns standalone data in ₹ lakhs; basis only determinable from re_desc_note_fin footnotes
 - [DB password unavailable](db-connection-limits.md) — Supabase DB password is not in env vars; service_role JWT cannot be used with psql/pg; DDL requires SQL editor
 - [Fail-closed research locks](research-run-locks.md) — fixed-row run locks must not auto-expire without write fencing; interrupted runs require owner-aware cleanup
+- [Annual-report evidence anchors](annual-report-evidence-anchors.md) — fixed-report adapters may require explicit in-document anchors when generic retrieval misses statement rows; preserve exact source tokens and basis.

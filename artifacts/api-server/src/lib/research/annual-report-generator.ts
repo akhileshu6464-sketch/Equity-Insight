@@ -42,11 +42,29 @@ const SECTION_CONFIG: Record<
       "Explain the major businesses, supported revenue/profit drivers, strategy, and important business changes. Treat segment economics as consolidated unless the source explicitly says otherwise.",
     checkCategories: ["consolidated", "long_term"],
   },
+  segments: {
+    title: "Segment Analysis",
+    instruction:
+      "Analyse the disclosed operating segments, their relative revenue or profitability contribution, and the key change in each material segment. Keep segment data distinct from subsidiaries and identify inter-segment eliminations where disclosed.",
+    checkCategories: ["consolidated", "long_term"],
+  },
   financial: {
     title: "Financial Performance",
     instruction:
       "Explain revenue, operating performance, margins, profit, and EPS where supported. Prefer consolidated group figures and explain meaning rather than reproducing statements.",
     checkCategories: ["accounting", "consolidated", "shareholder_economics"],
+  },
+  financial_trends: {
+    title: "Five-Year Financial Trends",
+    instruction:
+      "Use the annual report's multi-year consolidated financial history to explain the direction of revenue, EBITDA, profit, fixed assets, and any clearly disclosed trend. Compare only periods and figures carried on the same accounting basis. Do not invent calculated growth rates when they are not directly established.",
+    checkCategories: ["accounting", "consolidated", "long_term"],
+  },
+  ratios: {
+    title: "Financial Ratios",
+    instruction:
+      "Analyse only disclosed or safely calculated liquidity, leverage, margin, return, and coverage ratios. State the direction versus the comparable period where supplied. A calculation is permitted only when every same-basis input is cited; otherwise explain the ratio was not established.",
+    checkCategories: ["accounting", "consolidated", "capital_allocation"],
   },
   cash_balance_sheet: {
     title: "Cash Flow & Balance Sheet",
@@ -54,11 +72,65 @@ const SECTION_CONFIG: Record<
       "Analyse operating cash flow, capex, free-cash-flow implications, debt, liquidity, working capital, and important balance-sheet changes. Do not use general revenue, EBITDA, or PAT figures as substitutes for cash-flow or balance-sheet evidence. Do not calculate a figure unless every input is cited on the same accounting basis.",
     checkCategories: ["capital_allocation", "consolidated", "contingent_liabilities"],
   },
+  cash_flow: {
+    title: "Cash Flow",
+    instruction:
+      "Analyse operating, investing, and financing cash flows, capital expenditure, cash conversion, and any pre-financing free-cash-flow implication. Do not substitute profit or EBITDA for cash-flow evidence, and calculate only from cited same-basis inputs.",
+    checkCategories: ["capital_allocation", "consolidated", "contingent_liabilities"],
+  },
+  balance_sheet: {
+    title: "Balance Sheet",
+    instruction:
+      "Analyse liquidity, cash, fixed assets, equity, current assets and liabilities, and material balance-sheet movements. Do not mix parent-only and consolidated balances or infer segment-level leverage from group-only data.",
+    checkCategories: ["capital_allocation", "consolidated", "contingent_liabilities"],
+  },
+  receivables: {
+    title: "Receivables",
+    instruction:
+      "Analyse trade receivables, ageing, expected-credit-loss disclosures, and collection risk only from the annual report. Keep operating receivables separate from related-party balances and do not infer a collection problem without evidence.",
+    checkCategories: ["accounting", "consolidated"],
+  },
+  inventory: {
+    title: "Inventory",
+    instruction:
+      "Analyse inventory composition, valuation, impairment or obsolescence disclosures, and any movement relevant to cash conversion. Do not infer inventory stress without evidence from the annual report.",
+    checkCategories: ["accounting", "consolidated"],
+  },
+  payables: {
+    title: "Payables",
+    instruction:
+      "Analyse trade payables, supplier or MSME disclosures, and payment obligations only where the annual report provides evidence. Do not treat ordinary payables as a red flag without context.",
+    checkCategories: ["accounting", "consolidated"],
+  },
+  working_capital: {
+    title: "Working Capital",
+    instruction:
+      "Bring together receivables, inventory, payables, current assets, current liabilities, and disclosed liquidity ratios to explain working-capital direction. Do not calculate a cash-conversion cycle unless every input and period is established on the same basis.",
+    checkCategories: ["accounting", "consolidated", "capital_allocation"],
+  },
+  debt: {
+    title: "Debt & Liquidity",
+    instruction:
+      "Analyse net debt, borrowings, finance costs, debt ratios, maturity or currency risks, and liquidity. Do not infer segment debt from consolidated debt, and do not calculate coverage unless all same-basis inputs are cited.",
+    checkCategories: ["consolidated", "capital_allocation", "contingent_liabilities"],
+  },
   management: {
     title: "Management & Strategy",
     instruction:
       "Analyse management's stated strategy, priorities, targets or guidance, and capital-allocation plans. Do not repeat general revenue, EBITDA, PAT, or debt figures unless management explicitly connects them to a strategic decision. Label statements about future outcomes as management-stated, not as facts that will occur.",
     checkCategories: ["management", "capital_allocation"],
+  },
+  outlook: {
+    title: "Outlook & Guidance",
+    instruction:
+      "Analyse management-stated outlook, targets, guidance, and priorities by material business where disclosed. Separate management expectations from achieved results and say when prior guidance cannot be compared with delivery using this annual report alone.",
+    checkCategories: ["management", "capital_allocation", "long_term"],
+  },
+  industry: {
+    title: "Industry Context",
+    instruction:
+      "Explain only the industry, demand, pricing, regulatory, or competitive context described in the annual report and how it relates to the group’s material businesses. Do not add outside market data or peer comparisons.",
+    checkCategories: ["long_term"],
   },
   related_parties: {
     title: "Related-Party Transactions",
@@ -111,12 +183,36 @@ const SEVERITIES = new Set(["LOW", "MEDIUM", "HIGH"]);
 const SECTION_RELEVANCE: Record<AnnualReportSectionKey, RegExp> = {
   business:
     /\b(?:segment|business|retail|digital services|jio|oil to chemicals|o2c|oil and gas|new energy|operations?)\b/i,
+  segments:
+    /\b(?:segment|oil to chemicals|o2c|oil and gas|retail|digital services|financial services|media|segment revenue|segment result|inter.?segment)\b/i,
   financial:
     /\b(?:revenue|income|ebitda|profit|pat|margin|eps|tax|expense|earnings)\b/i,
+  financial_trends:
+    /\b(?:five.?year|ten.?year|trend|revenue|ebitda|profit|fixed assets|financial highlights|grew|increased|declined)\b/i,
+  ratios:
+    /\b(?:ratio|margin|roce|ronw|return on|debt.?equity|current ratio|interest coverage|turnover)\b/i,
   cash_balance_sheet:
     /\b(?:cash|capex|capital expenditure|debt|borrow|liquid|working capital|balance sheet|asset|liabilit|inventory|receivable|payable|free cash|net debt)\w*/i,
+  cash_flow:
+    /\b(?:cash flow|operating cash|investing cash|financing cash|capex|capital expenditure|free cash|cash equivalent)\w*/i,
+  balance_sheet:
+    /\b(?:balance sheet|asset|liabilit|equity|cash and cash|fixed asset|current asset|current liabilit|liquidity)\w*/i,
+  receivables:
+    /\b(?:receivable|expected credit loss|ageing|collection|credit risk)\w*/i,
+  inventory:
+    /\b(?:inventor|stock in trade|raw material|obsolescence|valuation)\w*/i,
+  payables:
+    /\b(?:payable|supplier|creditor|msme|micro small)\w*/i,
+  working_capital:
+    /\b(?:working capital|current asset|current liabilit|receivable|inventor|payable|current ratio)\w*/i,
+  debt:
+    /\b(?:debt|net debt|borrow|finance cost|interest|maturity|currency)\w*/i,
   management:
     /\b(?:management|strategy|strategic|plan|target|guidance|priority|capital allocation|commission|capacity|new energy|technology|transition|investment)\w*/i,
+  outlook:
+    /\b(?:outlook|guidance|target|plan|priority|expected|growth opportunity|investment|new energy)\w*/i,
+  industry:
+    /\b(?:industry|market|demand|price|commodity|competition|regulatory|operating environment|macro)\w*/i,
   related_parties:
     /\b(?:related part|arm.?s length|audit committee approval|material related|rpt)\w*/i,
   governance:
@@ -791,6 +887,28 @@ export function coreAnchors(pack: EvidencePack): ResearchConclusion[] {
     }
   }
 
+  if (pack.sectionKey === "segments") {
+    const segmentTable = findExactChunkExcerpt(pack, 234, [
+      /Segment Revenue/i,
+      /Segment Result before Interest and Taxes/i,
+      /inter segment turnover/i,
+      /1,21,879/,
+    ]);
+    if (segmentTable) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "The segment table presents external turnover and results before interest and taxes, with total value of sales and services stated after elimination of ₹1,21,879 crore of inter-segment turnover.",
+          "FACT",
+          "HIGH",
+          false,
+          "NOT_APPLICABLE",
+          [segmentTable],
+        ),
+      );
+    }
+  }
+
   if (pack.sectionKey === "financial") {
     const revenue = findExactChunkExcerpt(pack, 44, [
       /Value of Sales and Services/i,
@@ -848,7 +966,64 @@ export function coreAnchors(pack: EvidencePack): ResearchConclusion[] {
     }
   }
 
-  if (pack.sectionKey === "cash_balance_sheet") {
+  if (pack.sectionKey === "financial_trends") {
+    const trend = findExactChunkExcerpt(pack, 44, [
+      /10-Year Financial Highlights/i,
+      /\(Consolidated\)/i,
+      /11,75,919/,
+      /7,88,743/,
+      /2,07,911/,
+      /1,23,684/,
+      /95,754/,
+      /66,184/,
+    ]);
+    if (trend) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "Across the five reported fiscal years from FY2021-22 to FY2025-26, consolidated sales and services rose from ₹7,88,743 crore to ₹11,75,919 crore, EBITDA from ₹1,23,684 crore to ₹2,07,911 crore, and profit for the year from ₹66,184 crore to ₹95,754 crore.",
+          "FACT",
+          "HIGH",
+          true,
+          "CONSOLIDATED",
+          [trend],
+        ),
+      );
+    }
+  }
+
+  if (pack.sectionKey === "ratios") {
+    const ratioTable = findExactChunkExcerpt(pack, 194, [
+      /Current Ratio/i,
+      /0\.99/,
+      /1\.05/,
+      /Debt-Equity Ratio/i,
+      /0\.41/,
+      /0\.37/,
+    ]);
+    const consolidatedBasis = findExactChunkExcerpt(pack, 44, [
+      /10-Year Financial Highlights/i,
+      /\(Consolidated\)/i,
+    ]);
+    if (ratioTable && consolidatedBasis) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "The disclosed current ratio was 0.99 in FY2025-26 versus 1.05 in FY2024-25, while the disclosed debt-equity ratio was 0.41 versus 0.37.",
+          "FACT",
+          "HIGH",
+          true,
+          "CONSOLIDATED",
+          [ratioTable, consolidatedBasis],
+        ),
+      );
+    }
+  }
+
+  if (
+    pack.sectionKey === "cash_balance_sheet" ||
+    pack.sectionKey === "cash_flow"
+  ) {
     const operatingCash = findExactChunkExcerpt(pack, 207, [
       /Net Cash Flow from Operating Activities/i,
       /1,92,113/,
@@ -947,6 +1122,190 @@ export function coreAnchors(pack: EvidencePack): ResearchConclusion[] {
           ),
         );
       }
+    }
+  }
+
+  if (pack.sectionKey === "balance_sheet") {
+    const cash = findExactChunkExcerpt(pack, 214, [
+      /Cash and Cash Equivalents as per Balance Sheet/i,
+      /1,45,977/,
+      /1,06,502/,
+    ]);
+    const consolidatedBasis = findExactChunkExcerpt(pack, 44, [
+      /10-Year Financial Highlights/i,
+      /\(Consolidated\)/i,
+    ]);
+    if (cash && consolidatedBasis) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "Consolidated cash and cash equivalents were ₹1,45,977 crore at March 31, 2026, versus ₹1,06,502 crore a year earlier.",
+          "FACT",
+          "HIGH",
+          true,
+          "CONSOLIDATED",
+          [cash, consolidatedBasis],
+        ),
+      );
+    }
+  }
+
+  if (pack.sectionKey === "inventory") {
+    const inventory = findExactChunkExcerpt(pack, 159, [
+      /Standalone Financial Statements/i,
+      /Inventories/i,
+      /1,04,925/,
+      /89,216/,
+    ]);
+    if (inventory) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "Standalone inventories were ₹1,04,925 crore at March 31, 2026, versus ₹89,216 crore a year earlier.",
+          "FACT",
+          "HIGH",
+          true,
+          "STANDALONE",
+          [inventory],
+        ),
+      );
+    }
+  }
+
+  if (pack.sectionKey === "receivables") {
+    const receivables = findExactChunkExcerpt(pack, 159, [
+      /Standalone Financial Statements/i,
+      /Trade Receivables/i,
+      /16,641/,
+      /15,591/,
+    ]);
+    if (receivables) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "Standalone trade receivables were ₹16,641 crore at March 31, 2026, versus ₹15,591 crore a year earlier.",
+          "FACT",
+          "HIGH",
+          true,
+          "STANDALONE",
+          [receivables],
+        ),
+      );
+    }
+  }
+
+  if (pack.sectionKey === "payables") {
+    const payables = findExactChunkExcerpt(pack, 159, [
+      /Standalone Financial Statements/i,
+      /Trade Payables Due to/i,
+      /Micro and Small Enterprises/i,
+      /573/,
+      /1,301/,
+    ]);
+    if (payables) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "Standalone trade payables due to micro and small enterprises were ₹573 crore at March 31, 2026, versus ₹1,301 crore a year earlier.",
+          "FACT",
+          "HIGH",
+          true,
+          "STANDALONE",
+          [payables],
+        ),
+      );
+    }
+  }
+
+  if (pack.sectionKey === "working_capital") {
+    const inventoryMovement = findExactChunkExcerpt(pack, 162, [
+      /Operating Profit before Working Capital Changes/i,
+      /Inventories/i,
+      /\(15,709\)/,
+      /\(4,116\)/,
+    ]);
+    const standaloneBasis = findExactChunkExcerpt(pack, 159, [
+      /Standalone Financial Statements/i,
+    ]);
+    if (inventoryMovement && standaloneBasis) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "In the standalone cash-flow reconciliation, inventory movement was (₹15,709 crore) in FY2025-26, compared with (₹4,116 crore) in FY2024-25.",
+          "FACT",
+          "HIGH",
+          true,
+          "STANDALONE",
+          [inventoryMovement, standaloneBasis],
+        ),
+      );
+    }
+  }
+
+  if (pack.sectionKey === "debt") {
+    const netDebt = findExactChunkExcerpt(pack, 44, [
+      /Consolidated Net Debt/i,
+      /1,24,717/,
+    ]);
+    const consolidatedBasis = findExactChunkExcerpt(pack, 44, [
+      /10-Year Financial Highlights/i,
+      /\(Consolidated\)/i,
+    ]);
+    if (netDebt && consolidatedBasis) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "The annual report states that consolidated net debt stood at ₹1,24,717 crore at the end of FY2025-26.",
+          "FACT",
+          "HIGH",
+          true,
+          "CONSOLIDATED",
+          [netDebt, consolidatedBasis],
+        ),
+      );
+    }
+  }
+
+  if (pack.sectionKey === "outlook") {
+    const o2cOutlook = findExactChunkExcerpt(pack, 56, [
+      /Outlook/i,
+      /FY 2026-27 outlook remains/i,
+      /volatile product and feedstock prices/i,
+      /demand and margins/i,
+    ]);
+    if (o2cOutlook) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "The Oil to Chemicals outlook says FY2026-27 remains uncertain, with volatile product and feedstock prices, Middle East supply disruption, and policy factors that may weigh on domestic demand and margins.",
+          "FACT",
+          "HIGH",
+          false,
+          "NOT_APPLICABLE",
+          [o2cOutlook],
+        ),
+      );
+    }
+  }
+
+  if (pack.sectionKey === "industry") {
+    const operatingEnvironment = findExactChunkExcerpt(pack, 44, [
+      /Operating Environment/i,
+      /Global economic expansion continued/i,
+      /Inflationary pressures/i,
+    ]);
+    if (operatingEnvironment) {
+      conclusions.push(
+        anchoredConclusion(
+          pack.sectionKey,
+          "The annual report says global economic expansion continued in CY25 and that inflationary pressures moderated marginally across many economies.",
+          "FACT",
+          "HIGH",
+          false,
+          "NOT_APPLICABLE",
+          [operatingEnvironment],
+        ),
+      );
     }
   }
 
@@ -1158,23 +1517,40 @@ function checksForSection(
   return researchChecks.filter((check) => categories.has(check.category));
 }
 
+const FRAMEWORK_SECTION_KEYS: Record<AnnualReportSectionKey, string[]> = {
+  business: ["business"],
+  segments: ["business"],
+  financial: ["financial"],
+  financial_trends: ["financial"],
+  ratios: ["financial", "balance_sheet"],
+  cash_balance_sheet: ["cash_flow", "balance_sheet"],
+  cash_flow: ["cash_flow"],
+  balance_sheet: ["balance_sheet"],
+  receivables: ["balance_sheet"],
+  inventory: ["balance_sheet"],
+  payables: ["balance_sheet"],
+  working_capital: ["cash_flow", "balance_sheet"],
+  debt: ["balance_sheet"],
+  management: ["management"],
+  outlook: ["outlook"],
+  industry: ["industry"],
+  related_parties: ["related_parties"],
+  governance: ["governance"],
+  shareholders: ["shareholders"],
+  subsidiaries: ["business"],
+  risks: ["red_flags"],
+  positives: ["positives"],
+};
+
 export async function generateAnnualReportSection(
   source: AnnualReportSource,
   pack: EvidencePack,
 ): Promise<SectionAnalysis> {
   const config = SECTION_CONFIG[pack.sectionKey];
   const checks = checksForSection(pack.sectionKey, source.databaseResearchChecks);
-  const frameworkSection =
-    pack.sectionKey === "cash_balance_sheet"
-      ? source.framework.sections.filter((section) =>
-          ["cash_flow", "balance_sheet"].includes(section.sectionKey),
-        )
-      : source.framework.sections.filter((section) => {
-          if (pack.sectionKey === "risks") return section.sectionKey === "red_flags";
-          if (pack.sectionKey === "positives") return section.sectionKey === "positives";
-          if (pack.sectionKey === "subsidiaries") return section.sectionKey === "business";
-          return section.sectionKey === pack.sectionKey;
-        });
+  const frameworkSection = source.framework.sections.filter((section) =>
+    FRAMEWORK_SECTION_KEYS[pack.sectionKey].includes(section.sectionKey),
+  );
 
   const system = [
     "You are StockLens' evidence-constrained annual-report analyst.",
