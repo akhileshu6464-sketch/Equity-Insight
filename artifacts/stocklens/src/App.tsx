@@ -15,9 +15,21 @@ import { Search, ArrowLeft, TrendingUp, AlertTriangle, Info, BookOpen, AlertCirc
 
 const queryClient = new QueryClient();
 
-// Clean out demo content blocks
+// Keep audit metadata in the API/database, but present only the investor-facing
+// prose in the normal report. Source details are not currently exposed as a
+// separate user interaction, so they remain intentionally out of the UI.
+const isAuditMetadataLine = (line: string) =>
+  /^\s*\[(?:Fact|Inference|Uncertain)\b.*\]\s*$/i.test(line) ||
+  /^\s*\[[^\]]*(?:confidence|Annual Report|chunks?\b|pages?\b|source|evidence)[^\]]*\]\s*$/i.test(line);
+
+const cleanInvestorContent = (text?: string) =>
+  (text || '')
+    .split(/\r?\n/)
+    .filter((line) => !isAuditMetadataLine(line))
+    .join('\n');
+
 const getBlocks = (text?: string) => {
-  return (text || '')
+  return cleanInvestorContent(text)
     .split(/\n\s*\n/)
     .map(b => b.trim())
     .filter(b => b && !b.startsWith('DEMO CONTENT:'));
