@@ -12,9 +12,7 @@ alter table public.industry_frameworks
 
 -- ─────────────────────────────────────────────────────────────
 -- 2. Add three new cross-check rules to the default framework.
---    These are metric-pair comparisons not present in migration 001.
---
---    New rules:
+--    New rules (metric-pair comparisons not present in migration 001):
 --      eps_vs_pat_growth   — detects share-count dilution
 --      other_income_vs_pat — detects profit quality: non-core income
 --      exceptional_vs_pat  — detects reliance on non-recurring items
@@ -59,8 +57,6 @@ where industry_type = 'default';
 update public.industry_frameworks
 set
   research_checks = '[
-
-    -- ── ACCOUNTING ──────────────────────────────────────────────
     {
       "check_key": "accounting_policy_changes",
       "category": "accounting",
@@ -85,8 +81,6 @@ set
       "not_automatic_red_flag": true,
       "context_required": "Distinguish structural other income (e.g., interest on a genuinely cash-rich treasury) from non-recurring items misclassified as other income. Assess recurrence and cash realisation."
     },
-
-    -- ── AUDITOR ──────────────────────────────────────────────────
     {
       "check_key": "auditor_change",
       "category": "auditor",
@@ -119,8 +113,6 @@ set
       "not_automatic_red_flag": true,
       "context_required": "Distinguish substantiated findings from unresolved allegations. Assess management response, board audit committee action and regulatory outcome."
     },
-
-    -- ── CONSOLIDATED ANALYSIS ────────────────────────────────────
     {
       "check_key": "minority_interest_quality",
       "category": "consolidated",
@@ -145,8 +137,6 @@ set
       "not_automatic_red_flag": true,
       "context_required": "Capital infusion into a new business in investment phase is structurally different from repeated infusions into a loss-making legacy entity. Assess strategic rationale and time-to-return."
     },
-
-    -- ── CAPITAL ALLOCATION ───────────────────────────────────────
     {
       "check_key": "incremental_roce",
       "category": "capital_allocation",
@@ -171,8 +161,6 @@ set
       "not_automatic_red_flag": true,
       "context_required": "Retained cash on the balance sheet is not automatically inefficient — a company saving for a capex cycle or avoiding forced fundraising at bad terms is rational. Assess deployment against stated strategy."
     },
-
-    -- ── SHAREHOLDER ECONOMICS ────────────────────────────────────
     {
       "check_key": "share_count_dilution",
       "category": "shareholder_economics",
@@ -189,8 +177,6 @@ set
       "not_automatic_red_flag": true,
       "context_required": "Distinguish dilution from ESOP exercises (gradual, disclosed) from large equity issuances that materially reset the share base. Assess whether the capital raised generated returns adequate to compensate existing shareholders."
     },
-
-    -- ── MANAGEMENT ───────────────────────────────────────────────
     {
       "check_key": "management_explanation_consistency",
       "category": "management",
@@ -215,15 +201,13 @@ set
       "not_automatic_red_flag": true,
       "context_required": "High absolute remuneration is not automatically problematic — context is competitive labour market, company scale and shareholder returns delivered. The concern is remuneration rising while shareholder returns deteriorate, or remuneration tied only to revenue or EBITDA rather than ROIC or per-share value."
     },
-
-    -- ── CONTINGENT LIABILITIES ───────────────────────────────────
     {
       "check_key": "contingent_liability_materiality",
       "category": "contingent_liabilities",
       "description": "Assess whether disclosed contingent liabilities (tax demands, legal disputes, guarantees, environmental claims, regulatory penalties) are material relative to the company''s net worth, free cash flow and debt capacity.",
       "relevance_note": "Apply when contingent liabilities are disclosed in the notes. Always assess size relative to financial capacity, not in absolute rupee terms alone.",
       "not_automatic_red_flag": true,
-      "context_required": "A contingent liability of ₹500 crore is immaterial for a company with ₹50,000 crore net worth but serious for one with ₹1,000 crore. Assess the nature of the dispute, management''s historical win/loss rate and provisions already made."
+      "context_required": "A contingent liability of Rs 500 crore is immaterial for a company with Rs 50,000 crore net worth but serious for one with Rs 1,000 crore. Assess the nature of the dispute, management''s historical win/loss rate and provisions already made."
     },
     {
       "check_key": "contingent_liability_crystallisation",
@@ -233,8 +217,6 @@ set
       "not_automatic_red_flag": true,
       "context_required": "Distinguish well-established tax demands at a routine appellate stage (typically low crystallisation probability) from liabilities where adverse outcomes have already been determined at lower tribunals or where management has stated provisions are unlikely to suffice."
     },
-
-    -- ── LONG-TERM INVESTMENT ─────────────────────────────────────
     {
       "check_key": "incremental_roic_trajectory",
       "category": "long_term",
@@ -249,7 +231,7 @@ set
       "description": "Assess whether the company''s competitive advantage (pricing power, cost position, network effects, regulatory moat, switching costs, brand) is strengthening or weakening. Use observable evidence: market share trends, margin trends relative to peers, customer retention.",
       "relevance_note": "Apply in the outlook and industry sections. Requires peer context and multi-year data.",
       "not_automatic_red_flag": true,
-      "context_required": "A temporarily weaker margin during an investment cycle is not the same as permanent competitive erosion. Look for durable structural signals: entry of a well-funded new competitor, commodity-isation of a previously differentiated product, regulatory changes removing a moat."
+      "context_required": "A temporarily weaker margin during an investment cycle is not the same as permanent competitive erosion. Look for durable structural signals: entry of a well-funded new competitor, commoditisation of a previously differentiated product, regulatory changes removing a moat."
     },
     {
       "check_key": "thesis_invalidation_evidence",
@@ -259,7 +241,6 @@ set
       "not_automatic_red_flag": true,
       "context_required": "The thesis invalidation conditions must be specific to this company and its industry — not generic risk statements. Generic risks that apply to every company (inflation, recession, regulation) are not useful thesis invalidation criteria."
     }
-
   ]'::jsonb,
   updated_at = now()
 where industry_type = 'default';
