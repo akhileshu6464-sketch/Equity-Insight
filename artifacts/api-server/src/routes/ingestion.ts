@@ -13,6 +13,7 @@ import { Router, type Request, type Response } from "express";
 import { runIngestionPipeline } from "../lib/ingestion/pipeline.js";
 import { fetchAndExtractNseResults, fetchNseShareholding } from "../lib/ingestion/nse-results.js";
 import { storeFinancialMetric } from "../lib/ingestion/store.js";
+import { extractPdfFromUrl, toDbExtractionStatus } from "../lib/ingestion/pdf-extractor.js";
 import { logger } from "../lib/logger.js";
 
 export const ingestionRouter = Router();
@@ -253,6 +254,167 @@ ingestionRouter.post("/nse-shareholding", async (req: Request, res: Response) =>
     });
   } catch (err) {
     res.status(500).json({ error: String(err) });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// POST /api/ingestion/extract-pdf
+// Body: { companyId, url, documentType?, reportingPeriod?, title? }
+//
+// Downloads the PDF at `url`, runs pdftotext (poppler), stores the
+// extracted text in documents.content with page markers, and returns
+// a full extraction report.
+//
+// Does NOT generate financial data. Does NOT modify accounting-basis rules.
+// Scanned/image PDFs are rejected (status = "scanned"), never invented.
+// ─────────────────────────────────────────────────────────────
+
+ingestionRouter.post("/extract-pdf", async (req: Request, res: Response) => {
+  const {
+    companyId,
+    url,
+    documentType,
+    reportingPeriod,
+    title,
+  } = req.body as {
+    companyId?: string;
+    url?: string;
+    documentType?: string;
+    reportingPeriod?: string;
+    title?: string;
+  };
+
+  if (!companyId || !url) {
+    res.status(400).json({
+      error: "companyId and url are required",
+      example: {
+        companyId: "11111111-1111-4111-8111-111111111111",
+        url: "https://nsearchives.nseindia.com/corporate/kavinavora_17072026190726_SE_FR_1.pdf",
+        documentType: "quarterly_result",
+        reportingPeriod: "Q1FY27",
+        title: "Outcome of Board Meeting — Q1FY27 Financial Results",
+      },
+    });
+    return;
+  }
+
+  // Basic URL validation
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    res.status(400).json({ error: `Invalid URL: ${url}` });
+    return;
+  }
+  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+    res.status(400).json({ error: "Only http/https URLs are supported" });
+    return;
+  }
+
+  logger.info({ companyId, url, documentType }, "PDF extraction requested");
+
+  try {
+    // ── 1. Extract PDF text ────────────────────────────────────
+    const extraction = await extractPdfFromUrl(url);
+    const dbStatus = toDbExtractionStatus(extraction.extractionStatus);
+
+    // ── 2. Store in documents table ────────────────────────────
+    let documentId: string | null = null;
+    let storageError: string | null = null;
+
+    if (extraction.contentBlock || !extraction.success) {
+      const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/+$/, "");
+      const supabaseKey = process.env.SUPABASE_SECRET_KEY;
+
+      if (supabaseUrl && supabaseKey) {
+        const docPayload: Record<string, unknown> = {
+          company_id: companyId,
+          title: title ?? extraction.metadata.title ?? parsedUrl.pathname.split("/").pop() ?? "PDF Document",
+          document_type: documentType ?? "other_filing",
+          reporting_period: reportingPeriod ?? null,
+          document_date: extraction.metadata.creationDate
+            ? extraction.metadata.creationDate.slice(0, 10).replace(/[A-Za-z].*/, "").trim() || null
+            : null,
+          publication_date: null,
+          source_name: parsedUrl.hostname.includes("nseindia") ? "NSE" : parsedUrl.hostname,
+          source_url: url,
+          document_url: url,
+          source_tier: parsedUrl.hostname.includes("nseindia") ? 1 : 2,
+          content: extraction.contentBlock,
+          text_extraction_status: dbStatus,
+          processing_status: extraction.success ? "processed" : "failed",
+        };
+
+        const storeResp = await fetch(`${supabaseUrl}/rest/v1/documents`, {
+          method: "POST",
+          headers: {
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`,
+            "Content-Type": "application/json",
+            Prefer: "return=representation",
+          },
+          body: JSON.stringify(docPayload),
+        });
+
+        const storeText = await storeResp.text();
+        if (storeResp.ok) {
+          try {
+            const rows = JSON.parse(storeText) as Array<{ id: string }>;
+            documentId = rows[0]?.id ?? null;
+          } catch { documentId = null; }
+        } else {
+          storageError = `HTTP ${storeResp.status}: ${storeText.slice(0, 200)}`;
+          logger.error({ storageError, url }, "Document storage failed");
+        }
+      } else {
+        storageError = "Supabase not configured (SUPABASE_URL / SUPABASE_SECRET_KEY missing)";
+      }
+    }
+
+    // ── 3. Return structured report ────────────────────────────
+    res.json({
+      status: extraction.success ? "success" : extraction.extractionStatus,
+
+      // ── Extraction details ─────────────────────────────────
+      extraction: {
+        tool: "pdftotext (poppler-utils — pre-installed in Replit environment)",
+        flags: "-layout -enc UTF-8",
+        sourceUrl: url,
+        extractedAt: extraction.extractedAt,
+        extractionStatus: extraction.extractionStatus,
+        success: extraction.success,
+        error: extraction.error ?? null,
+      },
+
+      // ── Document facts ─────────────────────────────────────
+      document: {
+        pageCount: extraction.pageCount,
+        extractedPageCount: extraction.extractedPageCount,
+        emptyPageCount: extraction.emptyPageCount,
+        totalChars: extraction.totalChars,
+        wasTruncated: extraction.wasTruncated,
+        metadata: extraction.metadata,
+      },
+
+      // ── Page-level preview ─────────────────────────────────
+      pagePreview: extraction.pages.slice(0, 3).map((p) => ({
+        pageNum: p.pageNum,
+        charCount: p.charCount,
+        isEmpty: p.isEmpty,
+        preview: p.text.slice(0, 400).replace(/\s+/g, " ").trim(),
+      })),
+
+      // ── Storage result ─────────────────────────────────────
+      storage: {
+        documentId,
+        stored: documentId !== null,
+        dbExtractionStatus: dbStatus,
+        error: storageError,
+      },
+    });
+  } catch (err) {
+    logger.error({ err, url }, "PDF extraction route failed");
+    res.status(500).json({ error: "PDF extraction failed", detail: String(err) });
   }
 });
 

@@ -450,11 +450,14 @@ export function extractFromContent(
     return extractFromHtml(content, entityName, reportingPeriod);
   }
   if (contentType.includes("pdf")) {
-    // base64-encoded PDF — cannot extract without decoding and parsing
+    // PDF text extraction is handled by pdf-extractor.ts (uses pdftotext/poppler).
+    // The pipeline route POST /api/ingestion/extract-pdf accepts a URL and runs the
+    // full extraction → storage flow. This synchronous path cannot handle PDFs
+    // (they need async shell calls and a URL); callers should use extractPdfFromUrl().
     return {
       success: false,
       reason: "PARSING_FAILED",
-      detail: "PDF extraction requires pdf-parse or equivalent library. Install pdf-parse and decode the base64 content, then use extractFromText() on the extracted text.",
+      detail: "PDF content requires async extraction via extractPdfFromUrl() in pdf-extractor.ts (uses pdftotext/poppler). Use POST /api/ingestion/extract-pdf with the document URL.",
     };
   }
   // Fall back to text extraction
