@@ -73,7 +73,11 @@ export type DataQualityStatus =
   | "VERIFIED"
   | "UNVERIFIED"
   | "CONFLICTING"
-  | "MISSING";
+  | "MISSING"
+  /** Source was reached but data could not be extracted (e.g. scanned PDF, bad XBRL) */
+  | "FAILED_EXTRACTION"
+  /** Value extracted but accounting basis or period is ambiguous — needs human review */
+  | "NEEDS_REVIEW";
 
 /**
  * Financial statement the metric belongs to.

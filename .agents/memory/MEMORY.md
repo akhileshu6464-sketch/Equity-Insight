@@ -1,0 +1,6 @@
+- [NSE API accessibility](nse-api-access.md) — NSE IS accessible from Replit cloud (not always blocked); sessions may vary by IP reputation
+- [BSE API status](bse-api-status.md) — BSE api.bseindia.com endpoints have been retired; redirect HTTP 302 to HTML; BSE website accessible
+- [Accounting basis constraint](accounting-basis-rule.md) — financial_metrics.accounting_basis is NOT NULL; metrics with unclear basis must be rejected, not defaulted
+- [NSE results API structure](nse-results-api.md) — results-comparision returns standalone data in ₹ lakhs; basis only determinable from re_desc_note_fin footnotes
+- [migration_004 pending](migration-004-pending.md) — FAILED_EXTRACTION and NEEDS_REVIEW enum values + filing_queue table need manual SQL editor run
+- [DB password unavailable](db-connection-limits.md) — Supabase DB password is not in env vars; service_role JWT cannot be used with psql/pg; DDL requires SQL editor

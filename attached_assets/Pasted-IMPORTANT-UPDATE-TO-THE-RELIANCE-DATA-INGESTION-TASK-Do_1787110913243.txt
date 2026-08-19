@@ -1,0 +1,222 @@
+IMPORTANT UPDATE TO THE RELIANCE DATA INGESTION TASK
+
+Do not treat NSE RSS as the actual financial-data source.
+
+The correct architecture must be:
+
+NSE RSS
+    ↓
+DISCOVER NEW FILING
+    ↓
+IDENTIFY RELIANCE + FILING TYPE
+    ↓
+FOLLOW OFFICIAL NSE/BSE/COMPANY SOURCE
+    ↓
+RETRIEVE ORIGINAL FILING / XBRL / PDF / HTML
+    ↓
+EXTRACT STRUCTURED DATA + DOCUMENT TEXT
+    ↓
+VALIDATE
+    ↓
+STORE IN SUPABASE
+    ↓
+MAKE AVAILABLE TO AI RESEARCH ENGINE
+
+RSS is ONLY the discovery/notification layer.
+
+EXPAND THE RELIANCE POC TO SUPPORT:
+
+A. ANNUAL DATA
+- Annual reports
+- Standalone financial statements
+- Consolidated financial statements
+- Auditor report
+- MD&A
+- Notes to accounts
+- Related-party disclosures
+- Corporate governance
+- BRSR where available
+
+B. QUARTERLY / PERIODIC DATA
+Support:
+- Q1
+- Q2
+- Q3
+- Q4 / full year
+- Half year
+- Nine months
+
+Where available, capture:
+- Standalone results
+- Consolidated results
+
+C. ONGOING FILINGS
+- Corporate announcements
+- Financial results
+- Integrated financial filings
+- Shareholding pattern
+- Related-party transactions
+- Board meetings
+- Corporate actions
+- Insider trading
+- Investor presentations
+- Corporate governance
+- BRSR
+- Other material filings
+
+D. XBRL
+
+Where an official NSE filing provides XBRL/structured data:
+- identify it
+- retrieve it where technically accessible
+- preserve the original XBRL/source reference
+- extract structured financial information
+- retain the original document/source alongside extracted values
+
+Do NOT rely only on PDF text extraction when structured official data
+is available.
+
+E. HISTORICAL DATA
+
+For the Reliance proof of concept, design the system to eventually
+support approximately:
+
+- 5 years of annual history
+- 12–16 quarters of quarterly history
+
+Do NOT invent or populate fake historical numbers.
+
+If historical retrieval is not technically possible through the current
+source, report the limitation instead.
+
+F. FINANCIAL BASIS — ABSOLUTE REQUIREMENT
+
+Every financial figure must retain:
+
+company
+entity
+metric
+value
+unit
+currency
+period
+fiscal year
+quarter/period
+statement type
+accounting basis:
+  STANDALONE
+  CONSOLIDATED
+source
+source URL
+document
+publication date
+extraction date
+verification status
+
+Never infer STANDALONE or CONSOLIDATED if the source does not clearly
+identify the basis.
+
+Never combine standalone and consolidated numbers.
+
+Do NOT calculate ratios yet.
+
+G. SOURCE HIERARCHY
+
+For financial information:
+
+Tier 1:
+- NSE official filing
+- BSE official filing
+- Company official filing
+
+Tier 2:
+- Company investor presentation
+- Official company announcement
+- Concall/official management material
+
+Tier 3:
+- Reliable third-party source
+
+If sources conflict:
+- retain both
+- flag the conflict
+- prefer the higher-priority source
+- do not silently overwrite data
+
+H. DOCUMENT LINEAGE
+
+Every extracted value must be traceable:
+
+financial value
+→ extracted record
+→ original filing
+→ original URL/document
+
+Every future AI conclusion must eventually be traceable to this
+evidence chain.
+
+I. DATA QUALITY
+
+Use statuses:
+
+VERIFIED
+UNVERIFIED
+CONFLICTING
+MISSING
+FAILED_EXTRACTION
+NEEDS_REVIEW
+
+If extraction is uncertain, do not create a definitive financial value.
+
+J. IMPORTANT LIMITATION
+
+Do not build Google News yet.
+
+Do not connect paid APIs.
+
+Do not scrape arbitrary websites.
+
+Do not build 5,000 companies.
+
+Do not generate the final research report.
+
+First make the Reliance official-filing pipeline work correctly.
+
+TEST:
+
+Demonstrate at least one successful flow for:
+
+1. A Reliance corporate announcement
+2. A Reliance financial result
+3. A Reliance annual report or official annual filing
+4. A Reliance shareholding filing
+5. A Reliance RPT filing, if available
+6. One XBRL/structured filing, if technically accessible
+
+For each test show:
+
+RSS/discovery
+→ official source
+→ document/XBRL
+→ extraction
+→ database record
+→ source URL
+→ accounting basis where applicable
+→ verification status
+
+If any source cannot be retrieved automatically, clearly report why.
+
+Do not fabricate or substitute data.
+
+After implementation, stop and report:
+- exact files changed
+- exact database structures used
+- sources successfully accessed
+- filing types successfully retrieved
+- XBRL status
+- PDF/HTML extraction status
+- historical-data status
+- any limitations
+- TypeScript/test results
+
+Do not proceed beyond this task.
