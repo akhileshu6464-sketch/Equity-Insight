@@ -223,8 +223,8 @@ function ResearchPage() {
     let whyItMatters = '';
     
     whatHappenedBlocks.forEach(block => {
-      if (block.toUpperCase().startsWith('WHY DOES IT MATTER?')) {
-        whyItMatters = block.replace(/^WHY DOES IT MATTER\??\s*/i, '').trim();
+      if (/^WHY (?:DOES IT MATTER\?|IT MATTERS)\b/i.test(block)) {
+        whyItMatters = block.replace(/^WHY (?:DOES IT MATTER\?|IT MATTERS)\s*/i, '').trim();
       } else if (!whatIsHappening) {
         whatIsHappening = block;
       }
