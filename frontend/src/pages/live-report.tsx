@@ -28,8 +28,11 @@ const BACKEND_URL =
   '';
 
 async function fetchResearch(ticker: string): Promise<CompanyResearchPayload> {
-  const url = `${BACKEND_URL}/api/companies/${encodeURIComponent(ticker)}/research`;
-  const res = await fetch(url);
+  const url = `${BACKEND_URL}/api/companies/${encodeURIComponent(ticker)}/research?ts=${Date.now()}`;
+  const res = await fetch(url, {
+    cache: 'no-store',
+    headers: { 'cache-control': 'no-cache' },
+  });
   if (!res.ok) throw new Error(`Failed to load research (${res.status})`);
   return res.json();
 }
@@ -320,7 +323,9 @@ export default function LiveReport({ params }: { params: { ticker: string } }) {
   const query = useQuery({
     queryKey: ['live-research', ticker],
     queryFn: () => fetchResearch(ticker),
-    staleTime: 60_000,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 
   const sectionByKey = useMemo(() => {
