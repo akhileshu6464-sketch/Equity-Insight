@@ -11,13 +11,39 @@ const TickerParam = z.object({ ticker: z.string().min(1).max(24) });
 const router: IRouter = Router();
 
 router.get("/companies", async (req, res) => {
-  const parsed = SearchQuery.safeParse(req.query);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Search text is required." });
-    return;
-  }
+  const rawSearch = typeof req.query.search === "string" ? req.query.search.trim() : "";
 
   try {
+    if (rawSearch.length === 0) {
+      // Return all active companies so the frontend can present a directory.
+      const parsed = SearchQuery.safeParse({ search: "%" });
+      if (!parsed.success) {
+        res.status(400).json({ error: "Search text is required." });
+        return;
+      }
+      // supabase supports selecting all with limit — call directly
+      const { supabaseRest } = await import("../lib/research/supabase-rest.js");
+      const rows = await supabaseRest<
+        Array<{
+          id: string;
+          name: string;
+          ticker: string;
+          exchange: string;
+          short_description: string | null;
+        }>
+      >(
+        "GET",
+        "/companies?select=id,name,ticker,exchange,short_description&is_active=eq.true&order=name.asc&limit=200",
+      );
+      res.json(rows);
+      return;
+    }
+
+    const parsed = SearchQuery.safeParse({ search: rawSearch });
+    if (!parsed.success) {
+      res.status(400).json({ error: "Search text is required." });
+      return;
+    }
     const data = await searchCompanies(parsed.data.search);
     res.json(data);
   } catch (error) {

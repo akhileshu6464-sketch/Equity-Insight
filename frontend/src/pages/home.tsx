@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { ArrowRight, BarChart3, FileText, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, BarChart3, FileText, Newspaper, ShieldCheck, Sparkles } from 'lucide-react';
 import { Link } from 'wouter';
-import { EmptySampleState, Footer, Header, SearchBox } from '@/components/stocklens-ui';
+import { Footer, Header } from '@/components/stocklens-ui';
+import { CompanySearch, CompanyDirectory } from '@/components/company-search';
 
 const sampleCards = [
   { label: 'Business map', value: '5 engines', detail: 'See where money comes from', icon: <BarChart3 size={17} /> },
@@ -10,7 +10,6 @@ const sampleCards = [
 ];
 
 export default function Home() {
-  const [unsupported, setUnsupported] = useState('');
   return (
     <div className="min-h-[100dvh] overflow-hidden">
       <Header />
@@ -21,33 +20,33 @@ export default function Home() {
           <div className="grid items-center gap-16 lg:grid-cols-[1.02fr_.98fr] lg:gap-24">
             <div className="relative z-10 max-w-2xl">
               <div className="reveal inline-flex items-center gap-2 rounded-full border border-[hsl(var(--primary)/.2)] bg-[hsl(var(--primary)/.06)] px-3 py-2 font-mono-stock text-[10px] uppercase tracking-[.12em] text-[hsl(var(--primary))]">
-                <Sparkles size={13} /> A calmer way to research
+                <Sparkles size={13} /> Automated multi-agent research
               </div>
               <h1 className="reveal reveal-delay-1 mt-7 font-display text-[clamp(52px,7.5vw,98px)] leading-[.91] tracking-[-.065em] text-[hsl(var(--foreground))]">Understand any company <span className="text-[hsl(var(--primary))]">before you invest.</span></h1>
-              <p className="reveal reveal-delay-2 mt-7 max-w-lg text-[17px] leading-[1.65] text-[hsl(var(--muted-foreground))]">StockLens turns a complex company into a clear research story — what it does, how it earns, what changed, and what deserves a closer look.</p>
+              <p className="reveal reveal-delay-2 mt-7 max-w-lg text-[17px] leading-[1.65] text-[hsl(var(--muted-foreground))]">Seven specialist agents read the annual report, filings, concalls, credit ratings and material news, then hand you a professional Initiating-Coverage report — grounded in evidence, no jargon.</p>
               <div className="reveal reveal-delay-3 mt-9 max-w-xl">
-                <SearchBox onUnsupported={setUnsupported} />
-                {unsupported && <EmptySampleState query={unsupported} />}
-                <p className="mt-3 flex items-center gap-2 pl-1 text-xs text-[hsl(var(--muted-foreground))]"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" />Sample library currently includes one carefully built company report.</p>
+                <CompanySearch />
+                <p className="mt-3 flex items-center gap-2 pl-1 text-xs text-[hsl(var(--muted-foreground))]"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" />Type any Indian ticker — if it's not covered yet, StockLens will onboard it and pull sources automatically.</p>
+                <CompanyDirectory />
               </div>
             </div>
             <div className="relative mx-auto w-full max-w-[510px] lg:mt-4">
               <div className="absolute -inset-5 rounded-[35px] border border-[hsl(var(--primary)/.08)] rotate-3" />
               <div className="relative overflow-hidden rounded-[25px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]">
                 <div className="flex items-center justify-between border-b border-[hsl(var(--border))] px-5 py-4">
-                  <div className="flex items-center gap-2.5"><span className="grid h-8 w-8 place-items-center rounded-lg bg-[hsl(var(--primary))] text-xs font-bold text-[hsl(var(--primary-foreground))]">R</span><div><p className="text-sm font-semibold">Reliance Industries</p><p className="font-mono-stock text-[9px] uppercase text-[hsl(var(--muted-foreground))]">NSE · SAMPLE REPORT</p></div></div>
-                  <span className="rounded-full bg-[hsl(var(--primary)/.1)] px-2.5 py-1 font-mono-stock text-[9px] text-[hsl(var(--primary))]">UNDERSTAND</span>
+                  <div className="flex items-center gap-2.5"><span className="grid h-8 w-8 place-items-center rounded-lg bg-[hsl(var(--primary))] text-xs font-bold text-[hsl(var(--primary-foreground))]">R</span><div><p className="text-sm font-semibold">Reliance Industries</p><p className="font-mono-stock text-[9px] uppercase text-[hsl(var(--muted-foreground))]">7 specialists · QA · 30 sections</p></div></div>
+                  <span className="rounded-full bg-[hsl(var(--primary)/.1)] px-2.5 py-1 font-mono-stock text-[9px] text-[hsl(var(--primary))]">LIVE</span>
                 </div>
                 <div className="p-5">
-                  <div className="flex items-end justify-between"><div><p className="eyebrow">Company snapshot</p><p className="mt-2 font-display text-4xl tracking-[-.05em]">₹19.25L cr</p></div><div className="text-right"><p className="font-mono-stock text-xs text-[hsl(var(--primary))]">+1.31%</p><p className="mt-1 text-[10px] text-[hsl(var(--muted-foreground))]">sample close</p></div></div>
+                  <div className="flex items-end justify-between"><div><p className="eyebrow">Consolidated revenue FY25-26</p><p className="mt-2 font-display text-4xl tracking-[-.05em]">₹11.76L cr</p></div><div className="text-right"><p className="font-mono-stock text-xs text-[hsl(var(--primary))]">+9.8% YoY</p><p className="mt-1 text-[10px] text-[hsl(var(--muted-foreground))]">from annual report</p></div></div>
                   <div className="mt-5 h-[122px] rounded-xl bg-[hsl(var(--secondary)/.6)] p-3">
                     <svg viewBox="0 0 430 100" preserveAspectRatio="none" className="h-full w-full"><path d="M0 84 C40 76, 54 89, 84 72 S123 63, 152 68 S194 54, 220 59 S250 47, 278 52 S318 34, 344 41 S380 25, 430 13" fill="none" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" /><path d="M0 84 C40 76, 54 89, 84 72 S123 63, 152 68 S194 54, 220 59 S250 47, 278 52 S318 34, 344 41 S380 25, 430 13 L430 100 L0 100 Z" fill="hsl(var(--primary)/.08)" /></svg>
                   </div>
                   <div className="mt-5 grid grid-cols-3 gap-2 border-t border-[hsl(var(--border))] pt-4">{[['O2C', '54%'], ['Digital', '22%'], ['Retail', '16%']].map(([a, b]) => <div key={a}><p className="font-mono-stock text-[10px] text-[hsl(var(--muted-foreground))]">{a}</p><p className="mt-1 text-lg font-semibold">{b}</p></div>)}</div>
                 </div>
-                <div className="flex items-center justify-between border-t border-[hsl(var(--border))] bg-[hsl(var(--secondary)/.42)] px-5 py-3"><span className="font-mono-stock text-[9px] uppercase tracking-[.08em] text-[hsl(var(--muted-foreground))]">Business · cash · risk · valuation</span><ArrowRight size={15} className="text-[hsl(var(--primary))]" /></div>
+                <div className="flex items-center justify-between border-t border-[hsl(var(--border))] bg-[hsl(var(--secondary)/.42)] px-5 py-3"><span className="font-mono-stock text-[9px] uppercase tracking-[.08em] text-[hsl(var(--muted-foreground))]">Business · cash · risk · governance · outlook</span><ArrowRight size={15} className="text-[hsl(var(--primary))]" /></div>
               </div>
-              <div className="absolute -bottom-7 -left-7 hidden w-44 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-md)] sm:block"><p className="eyebrow">Research mode</p><p className="mt-2 font-display text-xl">Plain English</p><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--muted))]"><div className="h-full w-[82%] rounded-full bg-[hsl(var(--accent))]" /></div></div>
+              <div className="absolute -bottom-7 -left-7 hidden w-44 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-md)] sm:block"><p className="eyebrow">Fresh sources</p><p className="mt-2 font-display text-xl">Auto-refreshed</p><div className="mt-3 flex items-center gap-2 text-[11px] text-[hsl(var(--muted-foreground))]"><Newspaper size={12} /> News · Filings · Ratings</div></div>
             </div>
           </div>
         </section>
@@ -71,7 +70,7 @@ export default function Home() {
         <section className="mx-auto max-w-[1380px] px-5 pb-20 lg:px-10 lg:pb-28">
           <div className="relative overflow-hidden rounded-[26px] bg-[hsl(var(--primary))] px-6 py-10 text-[hsl(var(--primary-foreground))] md:px-12 md:py-14">
             <div className="absolute right-[-40px] top-[-100px] h-[300px] w-[300px] rounded-full border-[32px] border-[hsl(var(--primary-foreground)/.07)]" />
-            <div className="relative max-w-2xl"><p className="eyebrow text-[hsl(var(--primary-foreground)/.62)]">Start with a real example</p><h2 className="mt-4 font-display text-4xl leading-[.98] tracking-[-.04em] md:text-6xl">What actually drives Reliance?</h2><p className="mt-5 max-w-lg text-sm leading-relaxed text-[hsl(var(--primary-foreground)/.72)]">Explore a sample report designed to show the full StockLens experience — no login, no live data, no trading noise.</p><Link href="/live-report/RELIANCE" data-testid="link-try-reliance" className="mt-8 inline-flex items-center gap-3 rounded-xl bg-[hsl(var(--accent))] px-5 py-3.5 text-sm font-semibold text-[hsl(var(--accent-foreground))] transition-transform hover:-translate-y-0.5">Try Reliance Industries <ArrowRight size={16} /></Link></div>
+            <div className="relative max-w-2xl"><p className="eyebrow text-[hsl(var(--primary-foreground)/.62)]">Start with a real example</p><h2 className="mt-4 font-display text-4xl leading-[.98] tracking-[-.04em] md:text-6xl">What actually drives Reliance?</h2><p className="mt-5 max-w-lg text-sm leading-relaxed text-[hsl(var(--primary-foreground)/.72)]">Open the live 30-section Initiating Coverage report — with programmatic calculations, evidence tags and auto-discovered filings and news alongside it.</p><div className="mt-8 flex flex-wrap items-center gap-3"><Link href="/live-report/RELIANCE" data-testid="link-try-reliance" className="inline-flex items-center gap-3 rounded-xl bg-[hsl(var(--accent))] px-5 py-3.5 text-sm font-semibold text-[hsl(var(--accent-foreground))] transition-transform hover:-translate-y-0.5">Open Reliance research <ArrowRight size={16} /></Link><Link href="/intelligence/RELIANCE" data-testid="link-reliance-intelligence" className="inline-flex items-center gap-3 rounded-xl border border-[hsl(var(--primary-foreground)/.35)] bg-[hsl(var(--primary-foreground)/.08)] px-5 py-3.5 text-sm font-semibold text-[hsl(var(--primary-foreground))] transition-colors hover:bg-[hsl(var(--primary-foreground)/.14)]">Live company intelligence <ArrowRight size={16} /></Link></div></div>
           </div>
         </section>
       </main>
