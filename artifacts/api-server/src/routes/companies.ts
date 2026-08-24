@@ -1,28 +1,24 @@
 import { Router, type IRouter } from "express";
-import {
-  GetCompanyResearchParams,
-  GetCompanyResearchResponse,
-  SearchCompaniesQueryParams,
-  SearchCompaniesResponse,
-} from "@workspace/api-zod";
+import { z } from "zod";
 import {
   getCompanyResearch,
   searchCompanies,
 } from "../lib/supabase";
 
+const SearchQuery = z.object({ search: z.string().min(1).max(100) });
+const TickerParam = z.object({ ticker: z.string().min(1).max(24) });
+
 const router: IRouter = Router();
 
 router.get("/companies", async (req, res) => {
-  const parsed = SearchCompaniesQueryParams.safeParse(req.query);
+  const parsed = SearchQuery.safeParse(req.query);
   if (!parsed.success) {
     res.status(400).json({ error: "Search text is required." });
     return;
   }
 
   try {
-    const data = SearchCompaniesResponse.parse(
-      await searchCompanies(parsed.data.search),
-    );
+    const data = await searchCompanies(parsed.data.search);
     res.json(data);
   } catch (error) {
     req.log.error({ err: error }, "Failed to search Supabase companies");
@@ -31,7 +27,7 @@ router.get("/companies", async (req, res) => {
 });
 
 router.get("/companies/:ticker/research", async (req, res) => {
-  const parsed = GetCompanyResearchParams.safeParse(req.params);
+  const parsed = TickerParam.safeParse(req.params);
   if (!parsed.success) {
     res.status(400).json({ error: "A company ticker is required." });
     return;
@@ -43,8 +39,7 @@ router.get("/companies/:ticker/research", async (req, res) => {
       res.status(404).json({ error: "Company research was not found." });
       return;
     }
-
-    res.json(GetCompanyResearchResponse.parse(data));
+    res.json(data);
   } catch (error) {
     req.log.error({ err: error }, "Failed to load Supabase company research");
     res.status(503).json({ error: "The research database is unavailable." });

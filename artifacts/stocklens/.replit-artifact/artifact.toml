@@ -1,7 +1,7 @@
 kind = "web"
 previewPath = "/"
 title = "StockLens"
-description = "A plain-English Indian stock research website that helps investors understand what happened in a company, why it happened, and what to watch next, starting with a realistic Reliance Industries prototype."
+description = "A premium Indian equity research prototype that helps everyday investors understand a company through plain-English business analysis, financial trends, risks, management commentary, valuation context, and sample news."
 version = "1.0.0"
 id = "artifacts/stocklens"
 router = "path"
