@@ -41,7 +41,7 @@ export function Header({ report = false }: { report?: boolean }) {
           <nav className="hidden items-center gap-7 md:flex">
             <a href="#how-it-works" data-testid="link-how-it-works" className="text-sm text-[hsl(var(--muted-foreground))] transition-colors hover:text-[hsl(var(--foreground))]">How it works</a>
             <a href="#method" data-testid="link-method" className="text-sm text-[hsl(var(--muted-foreground))] transition-colors hover:text-[hsl(var(--foreground))]">Our method</a>
-            <Link href="/research/reliance-industries" data-testid="link-sample-report" className="flex items-center gap-1.5 text-sm font-semibold text-[hsl(var(--primary))]">View sample report <ArrowRight size={15} /></Link>
+            <Link href="/live-report/RELIANCE" data-testid="link-sample-report" className="flex items-center gap-1.5 text-sm font-semibold text-[hsl(var(--primary))]">View sample report <ArrowRight size={15} /></Link>
           </nav>
         )}
         <button type="button" onClick={() => setOpen(!open)} data-testid="button-open-menu" className="grid h-9 w-9 place-items-center rounded-lg border border-[hsl(var(--border))] text-[hsl(var(--foreground))] md:hidden">
@@ -53,7 +53,7 @@ export function Header({ report = false }: { report?: boolean }) {
           <div className="grid gap-4 text-sm">
             <a href="#how-it-works" onClick={() => setOpen(false)} data-testid="mobile-link-how-it-works">How it works</a>
             <a href="#method" onClick={() => setOpen(false)} data-testid="mobile-link-method">Our method</a>
-            <button type="button" onClick={() => { setLocation('/research/reliance-industries'); setOpen(false); }} data-testid="mobile-button-sample-report" className="flex items-center justify-between text-left font-semibold text-[hsl(var(--primary))]">View sample report <ArrowRight size={15} /></button>
+            <button type="button" onClick={() => { setLocation('/live-report/RELIANCE'); setOpen(false); }} data-testid="mobile-button-sample-report" className="flex items-center justify-between text-left font-semibold text-[hsl(var(--primary))]">View sample report <ArrowRight size={15} /></button>
           </div>
         </div>
       )}
@@ -67,7 +67,7 @@ export function SearchBox({ onUnsupported }: { onUnsupported?: (value: string) =
   const go = () => {
     const normalized = query.trim().toLowerCase();
     if (normalized === 'reliance' || normalized === 'reliance industries' || normalized === 'reliance industries limited') {
-      setLocation('/research/reliance-industries');
+      setLocation('/live-report/RELIANCE');
     } else if (query.trim()) {
       onUnsupported?.(query.trim());
     }

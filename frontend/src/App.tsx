@@ -5,7 +5,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import Home from '@/pages/home';
-import Research from '@/pages/research';
 import LiveReport from '@/pages/live-report';
 import {
   Route,
@@ -18,13 +17,14 @@ const queryClient = new QueryClient();
 
 function Router() {
   return (
-    // Keep a shared shell (sidebar, navbar) outside the boundary so it
-    // survives a page crash.
     <RoutedErrorBoundary>
       <Switch>
         <Route path="/" component={Home} />
-        <Route path="/research/reliance-industries" component={Research} />
         <Route path="/live-report/:ticker" component={LiveReport} />
+        {/* Legacy sample-report URL — now serves the same live multi-agent report */}
+        <Route path="/research/reliance-industries">
+          {() => <LiveReport params={{ ticker: 'RELIANCE' }} />}
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>
