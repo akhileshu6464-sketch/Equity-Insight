@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, AlertTriangle, ArrowLeft, Sparkles } from 'lucide-react';
+import { Loader2, AlertTriangle, ArrowLeft, ArrowUpRight, Sparkles } from 'lucide-react';
 import { Link } from 'wouter';
 import { Header, Footer } from '@/components/stocklens-ui';
 
@@ -360,20 +360,31 @@ export default function LiveReport({ params }: { params: { ticker: string } }) {
         </div>
 
         <header className="mt-6 border-b border-[hsl(var(--border))] pb-8">
-          <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">
-            <span className="rounded-full border border-[hsl(var(--accent)/.35)] bg-[hsl(var(--accent)/.08)] px-3 py-1 font-semibold text-[hsl(var(--accent))]">
-              <Sparkles size={12} className="mr-1 inline" /> Multi-agent research
-            </span>
-            <span>Initiating Coverage · FY2025-26 Annual Report</span>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">
+                <span className="rounded-full border border-[hsl(var(--accent)/.35)] bg-[hsl(var(--accent)/.08)] px-3 py-1 font-semibold text-[hsl(var(--accent))]">
+                  <Sparkles size={12} className="mr-1 inline" /> Multi-agent research
+                </span>
+                <span>Initiating Coverage · FY2025-26 Annual Report</span>
+              </div>
+              <h1 className="mt-4 font-display text-[44px] leading-[1.02] tracking-[-0.03em] text-[hsl(var(--foreground))] lg:text-[56px]">
+                {query.data?.company.name ?? ticker}
+              </h1>
+              <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-[hsl(var(--muted-foreground))]">
+                Executed by seven specialist research agents · Master synthesis · QA validation.
+                Every finding is grounded in the ingested annual report, with programmatic
+                calculations and preserved consolidated / standalone accounting basis.
+              </p>
+            </div>
+            <Link
+              href={`/intelligence/${ticker}`}
+              data-testid="link-view-intelligence"
+              className="inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-2.5 text-[13px] font-semibold text-[hsl(var(--foreground))] transition-colors hover:bg-[hsl(var(--secondary))]"
+            >
+              Company intelligence <ArrowUpRight size={14} />
+            </Link>
           </div>
-          <h1 className="mt-4 font-display text-[44px] leading-[1.02] tracking-[-0.03em] text-[hsl(var(--foreground))] lg:text-[56px]">
-            {query.data?.company.name ?? ticker}
-          </h1>
-          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-[hsl(var(--muted-foreground))]">
-            Executed by seven specialist research agents · Master synthesis · QA validation.
-            Every finding is grounded in the ingested annual report, with programmatic
-            calculations and preserved consolidated / standalone accounting basis.
-          </p>
         </header>
 
         {query.isLoading && (

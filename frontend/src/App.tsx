@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import Home from '@/pages/home';
 import LiveReport from '@/pages/live-report';
+import Intelligence from '@/pages/intelligence';
 import {
   Route,
   Switch,
@@ -21,6 +22,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/live-report/:ticker" component={LiveReport} />
+        <Route path="/intelligence/:ticker" component={Intelligence} />
         {/* Legacy sample-report URL — now serves the same live multi-agent report */}
         <Route path="/research/reliance-industries">
           {() => <LiveReport params={{ ticker: 'RELIANCE' }} />}

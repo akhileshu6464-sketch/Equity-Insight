@@ -2,80 +2,100 @@
 
 ## 1. Original problem statement
 
-Implement the multi-agent equity-research engine for StockLens (cloned from
-`akhileshu6464-sketch/Equity-Insight`). The existing single-agent
-`annual-report-generator.ts` produces shallow summaries — replace it with a
-Master + 7 Specialists + QA/Validator architecture while preserving the
-existing checklist, Supabase ingestion/retrieval, evidence system, and UI.
+Build StockLens: a professional AI-powered Initiating Coverage equity
+research platform for the Indian market. Cloned from
+`akhileshu6464-sketch/Equity-Insight`. Preserve existing checklist,
+Supabase ingestion, retrieval, AI, calculations, evidence system, and UI.
 
 ## 2. Live URLs
 
 - **Preview**: `https://market-view-19.preview.emergentagent.com/`
-- **Sample static report**: `/research/reliance-industries`
-- **Multi-agent live report**: `/live-report/RELIANCE`
+- **Multi-agent research report**: `/live-report/RELIANCE`, `/live-report/TCS`
+- **Company Intelligence**: `/intelligence/RELIANCE`, `/intelligence/TCS`
 - **Backend proxy**: `/api/*` (FastAPI on :8001 → Express on :8002)
+- **Sample-report legacy URL**: `/research/reliance-industries` → aliased to LiveReport
 
 ## 3. Architecture
 
 ```
-┌────────────────────┐        ┌───────────────────────────────────────┐
-│ React (Vite) 3000  │ ─────▶ │ FastAPI 8001  ─── proxy ──▶ Node 8002 │
-└────────────────────┘        │           (spawns child)  Express     │
-                              └───────────────────────────────────────┘
-                                                │
-                                                ▼
-                                    ┌──────────────────────┐
-                                    │ Supabase REST + LLM  │
-                                    │ (OpenAI gpt-4o-mini) │
-                                    └──────────────────────┘
+┌────────────────────┐         ┌───────────────────────────────────────────┐
+│ React (Vite) 3000  │ ──────▶ │ FastAPI 8001 ─ proxy ─▶ Node 8002 Express │
+└────────────────────┘         │                          + scheduler       │
+                               └───────────────────────────────────────────┘
+                                                   │
+                                                   ▼
+                                   ┌─────────────────────────────────┐
+                                   │ Supabase REST (existing DB)     │
+                                   │ + OpenAI (gpt-4o-mini)          │
+                                   │ + Google News RSS               │
+                                   │ + BSE Corporate Announcements   │
+                                   └─────────────────────────────────┘
 ```
 
-- `/app/backend/server.py` — FastAPI proxy that spawns the Node backend and
-  forwards every `/api/*` request. Required to satisfy supervisor's fixed
-  `uvicorn` command.
-- `/app/artifacts/api-server` — Express + TS backend (original).
-- `/app/artifacts/api-server/src/lib/research/agents/` — **NEW** multi-agent code.
-- `/app/frontend` — Vite React app (added `LiveReport` page).
+## 4. Multi-Agent Research Engine (previous milestone)
 
-## 4. Multi-agent implementation
+`/app/artifacts/api-server/src/lib/research/agents/`:
+- 1 Master + 7 Specialists + deterministic QA validator + calculator
+- 30 report sections persisted to Supabase `research` table
+- Reliance test: 68 findings (64 supported), QA 43/25/0
 
-Located in `/app/artifacts/api-server/src/lib/research/agents/`:
+## 5. Multi-Source Intelligence Layer (this milestone)
 
-| File                    | Role                                                                     |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `types.ts`              | Shared types (`SpecialistFinding`, `MasterSynthesis`, `QAReport`)         |
-| `calculator.ts`         | Deterministic arithmetic (YoY, CAGR, margins, receivable/inventory days) |
-| `specialist-base.ts`    | LLM caller w/ 429-aware retry + evidence grounding + citation validation |
-| `specialists.ts`        | 7 specialist definitions (business, financial, cash/BS, mgmt, RPT, audit, risks) |
-| `validator.ts`          | Deterministic QA validator (numerics, basis, period, contradictions)     |
-| `master.ts`             | Orchestrator + parallel dispatch + section synthesis                     |
-| `persistence.ts`        | Writes `research` (30 sections) + `analysis_evidence` to Supabase        |
-| `engine.ts`             | `runRelianceMultiAgentResearch()` entrypoint                             |
+`/app/artifacts/api-server/src/lib/intelligence/`:
 
-New route: `POST /api/ai/research/multi-agent` (auth via `x-stocklens-research-key`).
+| File                            | Role                                                              |
+| ------------------------------- | ----------------------------------------------------------------- |
+| `types.ts`                      | `SourceType`, `DiscoveredItem`, `DiscoveryReport`, section-mapping|
+| `connectors/google-news.ts`     | Google News RSS parser + materiality scoring (no API key)         |
+| `connectors/bse-announcements.ts`| BSE Corporate Announcements API + subtype classification         |
+| `persister.ts`                  | Writes to existing `news` + `documents` tables with dedupe        |
+| `discovery.ts`                  | Orchestrator — parallel connectors → dedupe → persist             |
+| `read.ts`                       | Unified read API grouped by source_type                           |
+| `scheduler.ts`                  | In-process daily + weekly loops (enabled via env)                 |
 
-## 5. Model / knob defaults
+Routes (`/api/intelligence/…`):
+- `GET  /status` — scheduler status
+- `GET  /:ticker` — full intelligence stream for a company
+- `POST /:ticker/discover` — trigger a fresh discovery
+- `POST /onboard` — insert a company + run initial discovery
 
-- `STOCKLENS_SPECIALIST_MODEL` = `gpt-4o-mini` (higher TPM)
-- `STOCKLENS_MASTER_MODEL` = `gpt-4o-mini`
-- `STOCKLENS_SPECIALIST_CONCURRENCY` = `2`
-- Section synthesis parallelism = 2
+Frontend `/app/frontend/src/pages/intelligence.tsx`:
+- Tabs & filter chips per source type (Annual, Concall, Rating, Filing, IR Deck, News)
+- Item cards with source badge, date, publisher, "View source" outbound link
+- "Discover latest" button triggers on-demand refresh
+- Cross-links to `/live-report/:ticker`
 
-## 6. Reliance test run — result
+Scheduler defaults: daily = news (3d) + filings (21d); weekly deep = 30d news + 365d filings. Turn on with `STOCKLENS_SCHEDULER=on`.
 
-- Total findings: **68**  (supported: **64**)
-- QA passed: **43** / failed: **25**  (contradictions: **0**)
-- Sections persisted: **30** (`research` table replaced end-to-end)
-- Runtime: ~5m 22s
+## 6. Test evidence
 
-## 7. Backlog / next actions
+**Reliance** (auto-discovered):
+- 1 annual report (existing, preserved · unchanged)
+- 16 filings from BSE (Q1FY27 results, Reg 30 disclosures, Institutional Investor meets)
+- 1 credit rating
+- 1 investor presentation
+- 10 news headlines (₹2.73 lakh crore coal-gas investment, RCom chargesheet, brand-marketing appointment, index moves)
 
-- P1: Loosen numeric grounding to handle Indian formatting variants (`₹4,99,270 crore` vs `499270`) — will lift many findings from `UNCERTAIN` to `FACT`.
-- P1: Add company search UI on Home so any ingested company can be researched (currently locked to RELIANCE).
-- P2: Stream progress (SSE) from `/api/ai/research/multi-agent` so users see phase transitions live.
-- P2: Add specialist unit tests using recorded fixtures instead of live LLM.
-- P2: Cache specialist findings by question hash so a re-run only recomputes changed questions.
+**TCS** (onboarded during this run):
+- 15 filings from BSE
+- 1 concall transcript
+- 1 credit rating
+- 24 news headlines
 
-## 8. Credentials
+## 7. Preservation guarantees
+
+- Existing 30-section multi-agent report at `/live-report/RELIANCE` continues to render (91,663 chars, verified live).
+- Existing Reliance annual report row and its 283 document chunks in Supabase are untouched.
+- No new tables — reused `documents` + `news` + `companies` + `research` + `research_jobs`.
+
+## 8. Backlog / next actions
+
+- P1: Auto-download referenced PDFs (concall, credit rating, IR deck) → chunk → embed → make available to specialist retrieval so the research engine actually consumes concall transcripts and rating rationales.
+- P1: Wire an "event-driven research refresh" that re-runs only affected specialist sections when a new material filing arrives.
+- P2: Build the "onboard a new company" UI (search box on Home) — currently onboarding is via `POST /api/intelligence/onboard`.
+- P2: Add NSE filings connector as a fallback for BSE-only firms.
+- P3: Push discovery events to a queue table (`filing_queue`) so external workers can subscribe.
+
+## 9. Credentials
 
 See `/app/memory/test_credentials.md`.
