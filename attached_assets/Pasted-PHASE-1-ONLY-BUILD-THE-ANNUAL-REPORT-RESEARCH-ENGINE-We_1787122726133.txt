@@ -1,0 +1,284 @@
+PHASE 1 ONLY — BUILD THE ANNUAL REPORT RESEARCH ENGINE.
+
+We have successfully ingested the real Reliance Industries FY2025-26
+Annual Report.
+
+Document ID:
+77d948bd-ff1f-4f62-9355-db70188f7183
+
+It contains 187 pages and 283 stored chunks.
+
+CORE OBJECTIVE:
+
+Turn this ONE annual report into a useful investor research report.
+
+Do NOT add:
+- NSE
+- BSE
+- Google News
+- RSS
+- concall transcripts
+- peer data
+- valuation/current market data
+- XBRL ingestion
+- any other external source
+
+Use ONLY the verified Reliance FY2025-26 Annual Report chunks already
+stored in Supabase.
+
+==================================================
+RESEARCH PROCESS
+==================================================
+
+For each research section:
+
+1. Retrieve relevant annual-report chunks.
+2. Identify factual evidence.
+3. Record the source chunk/page.
+4. Distinguish FACT from INFERENCE.
+5. Assign confidence.
+6. Apply the existing research checks and cross-check rules.
+7. If evidence is insufficient, explicitly mark it insufficient.
+8. Do not fill gaps using general knowledge.
+
+The existing internal checklist is an INTERNAL RESEARCH FRAMEWORK.
+
+NEVER DISPLAY THE QUESTIONS/CHECKLIST TO THE USER.
+
+==================================================
+ACCOUNTING-BASIS INTEGRITY — CRITICAL
+==================================================
+
+This is a mandatory rule.
+
+Before using any financial figure, determine whether it is:
+
+- CONSOLIDATED
+- STANDALONE
+- NOT CLEAR
+
+Do not mix standalone and consolidated figures.
+
+For group-level business/economic analysis, prefer consolidated
+information where appropriate.
+
+Use standalone figures when the specific analytical question requires
+them, such as certain parent-company debt/capital-structure questions.
+
+If both are available and materially different, explain the difference.
+
+Every important financial conclusion must be traceable to the correct
+basis.
+
+If the accounting basis cannot be established from the evidence,
+do NOT guess.
+
+==================================================
+REPORT STRUCTURE
+==================================================
+
+Generate an investor-friendly report with these sections:
+
+1. QUICK VIEW
+
+Include only conclusions:
+
+- What is happening?
+- Biggest positive
+- Biggest concern
+- What matters most
+- What should investors watch?
+
+DO NOT display these as questions.
+
+Write them as conclusions.
+
+2. BUSINESS
+
+Explain:
+- major businesses
+- revenue/profit drivers where supported
+- business strategy
+- important business changes
+
+3. FINANCIAL PERFORMANCE
+
+Explain what happened to:
+- revenue
+- operating performance
+- margins
+- profit
+- EPS where available
+
+Do not simply reproduce financial statements.
+
+Explain what the numbers mean.
+
+4. CASH FLOW & BALANCE SHEET
+
+Analyze:
+- operating cash flow
+- capex
+- free-cash-flow implications where calculable
+- debt
+- liquidity
+- working capital
+- important balance-sheet changes
+
+Use the correct accounting basis for every figure.
+
+5. MANAGEMENT & STRATEGY
+
+Analyze management's stated:
+- strategy
+- priorities
+- targets/guidance
+- capital allocation plans
+
+Do not treat management statements as facts about future outcomes.
+
+6. RELATED-PARTY TRANSACTIONS
+
+Analyze RPTs using the existing RPT checklist.
+
+Look for:
+- materiality
+- pricing
+- nature of transaction
+- loans/advances
+- guarantees
+- receivables
+- promoter-related entities
+- commercial rationale
+- governance disclosures
+
+Do NOT call something a red flag without evidence.
+
+7. GOVERNANCE & AUDITOR
+
+Analyze:
+- auditor observations
+- qualifications
+- emphasis of matter
+- internal-control concerns where disclosed
+- auditor changes where disclosed
+- accounting concerns
+
+8. SHAREHOLDERS & OWNERSHIP
+
+Analyze information available in the annual report regarding:
+- promoter ownership
+- major shareholders
+- changes
+- pledging
+- dilution
+
+If the annual report doesn't provide enough current information,
+state that clearly.
+
+9. SUBSIDIARIES / JVs
+
+Identify material subsidiaries/JVs and explain why they matter to
+the consolidated business where evidence supports it.
+
+10. RISKS
+
+Only include evidence-backed material risks.
+
+11. POSITIVE DEVELOPMENTS
+
+Only include meaningful evidence-backed positives.
+
+12. INVESTOR TAKEAWAY
+
+End with a concise equity-research style synthesis:
+
+- business quality
+- current financial direction
+- major opportunity
+- major risk
+- most important things to monitor
+
+Do NOT provide a BUY/SELL recommendation at this stage because we
+are not yet incorporating valuation/current market expectations.
+
+==================================================
+OUTPUT RULES
+==================================================
+
+The user should see conclusions, NOT research questions.
+
+Bad:
+
+"What is the company's capital allocation strategy?"
+
+Good:
+
+"Capital allocation remains focused on ___, with the company
+prioritizing ___. The key investor consideration is ___."
+
+Bad:
+
+"Is RPT a red flag?"
+
+Good:
+
+"RPTs increased to ___. The disclosed transactions primarily relate
+to ___. Based on the available evidence, we do/do not identify a
+material governance concern."
+
+Every important factual claim must be backed by evidence.
+
+Avoid:
+- generic AI language
+- repetitive paragraphs
+- unnecessary explanations
+- invented information
+- unsupported conclusions
+- excessive tables
+- unnecessary charts
+
+The report may be detailed internally, but the final output must be
+crisp and useful to an investor.
+
+==================================================
+DATA INTEGRITY
+==================================================
+
+Use existing:
+- document_chunks
+- documents
+- analysis_evidence
+- research framework
+- cross-check framework
+- accounting-basis rules
+
+Do not create duplicate data structures unnecessarily.
+
+If a database migration is absolutely required:
+STOP and tell me before creating/running it.
+
+Do not silently modify the database schema.
+
+==================================================
+TEST
+==================================================
+
+Use ONLY the Reliance FY2025-26 Annual Report.
+
+Do not use external data.
+
+Run TypeScript checks.
+
+Generate the report only after retrieval/evidence checks pass.
+
+At the end report:
+
+1. What files were changed
+2. Whether a database migration is required
+3. Whether TypeScript passes
+4. Whether the Reliance annual-report analysis was generated
+5. Any sections where evidence was insufficient
+
+STOP after this phase.
+Do not start Phase 2.

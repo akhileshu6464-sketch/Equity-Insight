@@ -1,0 +1,596 @@
+Build a very simple website called "StockLens".
+
+CORE IDEA:
+
+This is a plain-English Indian stock research website.
+
+The user does NOT ask questions.
+
+The user simply searches for a company name, for example:
+
+Reliance Industries
+
+and immediately gets a simple, deeply researched explanation of what is happening in that company.
+
+The website should feel like:
+
+"Someone has already done the equity research for me and explained it in simple English."
+
+IMPORTANT:
+This is NOT a stock screener.
+This is NOT a financial dashboard.
+This is NOT a chatbot.
+This is NOT a charting website.
+
+DO NOT use charts.
+DO NOT create complicated tables.
+DO NOT create technical dashboards.
+DO NOT overwhelm the user with financial ratios.
+
+The website should primarily contain written explanations.
+
+--------------------------------------------------
+
+HOMEPAGE
+
+Create a very clean homepage.
+
+Large headline:
+
+"Understand a company before you invest."
+
+Subheadline:
+
+"Search a stock and understand what happened, why it happened, and what investors should worry about."
+
+Large search box:
+
+"Search company name or stock symbol"
+
+Example:
+
+[ Search Reliance, Ashoka Buildcon, SRF... ]
+
+Below it:
+
+"Try: Reliance Industries"
+
+When the user searches Reliance, open the Reliance research page.
+
+--------------------------------------------------
+
+COMPANY PAGE
+
+Create a page for:
+
+RELIANCE INDUSTRIES
+
+At the top show:
+
+Reliance Industries
+RELIANCE
+
+Then:
+
+"Everything you need to understand the company."
+
+Do NOT show a large financial dashboard.
+
+Instead, immediately start explaining the company.
+
+--------------------------------------------------
+
+SECTION 1
+
+WHAT DOES RELIANCE ACTUALLY DO?
+
+Write a simple explanation of the company.
+
+Explain:
+
+- What businesses it operates
+- What products/services it provides
+- Who its customers are
+- Which businesses are most important
+
+Use simple Indian English.
+
+Avoid professional jargon wherever possible.
+
+--------------------------------------------------
+
+SECTION 2
+
+HOW DOES RELIANCE MAKE MONEY?
+
+Explain each major business in simple language.
+
+For example:
+
+"Jio makes money mainly by..."
+"Retail makes money mainly by..."
+"O2C makes money mainly by..."
+
+Explain the business economics rather than simply listing revenue percentages.
+
+--------------------------------------------------
+
+SECTION 3
+
+WHAT HAPPENED TO THE BUSINESS?
+
+This is one of the most important sections.
+
+Explain:
+
+- What changed recently?
+- Did revenue increase or decrease?
+- Did profit increase or decrease?
+- Which business caused the change?
+- Was the change caused by price, volume, costs, competition, or something else?
+- Is the change temporary or potentially structural?
+
+The answer should read like a good analyst explaining the company to a friend.
+
+Example style:
+
+"Revenue fell this year mainly because X happened. At the same time, Y business continued to grow. So the decline was not across the entire company."
+
+--------------------------------------------------
+
+SECTION 4
+
+WHY DID EARNINGS CHANGE?
+
+Explain the chain of events.
+
+Use this format:
+
+WHAT HAPPENED
+
+WHY IT HAPPENED
+
+WHY IT MATTERS
+
+Do not simply repeat financial numbers.
+
+Example:
+
+"Profit fell because margins came under pressure. The main reason was..."
+
+Then:
+
+"Why does this matter?"
+
+Explain the implication for future earnings.
+
+--------------------------------------------------
+
+SECTION 5
+
+WHY DID CASH FLOW CHANGE?
+
+This section is VERY IMPORTANT.
+
+Compare:
+
+Profit
+Cash generated from operations
+Receivables
+Inventory
+Payables
+Capital expenditure
+
+But do not present these as a complicated financial statement.
+
+Instead explain:
+
+"The company reported ₹X of profit but generated only ₹Y of operating cash. The main reason was..."
+
+Then explain whether this is:
+
+NORMAL
+WORTH WATCHING
+RED FLAG
+
+Explain why.
+
+--------------------------------------------------
+
+SECTION 6
+
+DO THE NUMBERS ACTUALLY MAKE SENSE?
+
+This is the critical-thinking section.
+
+The future AI engine should compare:
+
+Profit vs cash flow
+Revenue vs receivables
+Revenue vs inventory
+Debt vs earnings
+Capex vs cash generation
+Margins vs input costs
+
+For the prototype, use realistic sample Reliance data.
+
+Explain findings in plain English.
+
+Example:
+
+"Revenue increased, but receivables increased much faster. This means more money is getting stuck with customers. That does not automatically mean something is wrong, but it is something investors should monitor."
+
+--------------------------------------------------
+
+SECTION 7
+
+WHAT IS GOING WELL?
+
+Write 3-5 simple points.
+
+Each point should explain:
+
+WHAT is going well
+WHY it is happening
+WHY it matters
+
+Do not use generic statements.
+
+--------------------------------------------------
+
+SECTION 8
+
+WHAT IS GOING WRONG?
+
+Write 3-5 specific issues.
+
+For each:
+
+WHAT happened
+WHY it happened
+WHY it matters
+
+--------------------------------------------------
+
+SECTION 9
+
+RED FLAGS
+
+This is one of the most important parts of the website.
+
+Find potential red flags by connecting different pieces of information.
+
+Each red flag should have this format:
+
+RED FLAG
+
+"Receivables are growing much faster than revenue."
+
+WHY?
+
+Explain the evidence.
+
+WHY DOES IT MATTER?
+
+Explain the potential consequence.
+
+SEVERITY:
+
+Watch
+Moderate
+High
+
+IMPORTANT:
+
+Never call something fraud, manipulation, accounting fraud, or wrongdoing merely because an unusual financial relationship exists.
+
+Clearly distinguish between:
+
+FACT
+ANALYSIS
+POSSIBLE RISK
+
+--------------------------------------------------
+
+SECTION 10
+
+WHAT IS MANAGEMENT SAYING?
+
+Explain recent management commentary in simple language.
+
+Include:
+
+What management expects
+What management says is going well
+What management says is going wrong
+Future plans
+Guidance
+
+Then create:
+
+"DID MANAGEMENT DELIVER?"
+
+Compare previous management statements with what actually happened.
+
+Example:
+
+"Management previously expected X. Actual performance was Y. Therefore execution appears..."
+
+--------------------------------------------------
+
+SECTION 11
+
+WHY DID THE STOCK PRICE FALL/RISE?
+
+This section should connect:
+
+Company results
+Management commentary
+News
+Investor expectations
+Stock price movement
+
+Explain the chain.
+
+Example:
+
+"The stock fell after the results because investors were expecting X. The company reported Y, which was weaker than expected. Management also said Z. This increased concerns about..."
+
+Do NOT simply say:
+
+"Stock fell because earnings were bad."
+
+Explain WHY the market reacted.
+
+--------------------------------------------------
+
+SECTION 12
+
+HAS THE BAD NEWS ALREADY BEEN PRICED IN?
+
+Create a simple explanation.
+
+Compare:
+
+Recent stock movement
+Recent earnings change
+Historical valuation
+Current valuation
+Available earnings expectations
+
+Then write:
+
+"What does this mean?"
+
+The answer must NOT say a definite BUY or SELL.
+
+Instead explain:
+
+"Some of the bad news appears to be reflected in the stock price, but..."
+
+or
+
+"The stock has fallen, but earnings expectations have also fallen, so the stock may not necessarily be cheap."
+
+Clearly label this as an analytical assessment, not certainty.
+
+--------------------------------------------------
+
+SECTION 13
+
+WHAT COULD GO WRONG?
+
+Explain the 5 biggest company-specific risks.
+
+For each:
+
+Risk
+Why it could happen
+Potential impact
+
+Use simple language.
+
+--------------------------------------------------
+
+SECTION 14
+
+WHAT SHOULD INVESTORS WATCH NEXT?
+
+Give 5 simple things investors should monitor.
+
+Example:
+
+"Watch whether receivables start coming down."
+
+"Watch whether margins recover."
+
+"Watch whether management delivers the promised growth."
+
+"Watch whether cash generation improves."
+
+--------------------------------------------------
+
+SECTION 15
+
+THE COMPANY IN SIMPLE WORDS
+
+At the bottom create a short conclusion.
+
+Title:
+
+"Reliance in 60 seconds"
+
+Write 2-4 paragraphs explaining:
+
+What the company does
+What is going well
+What is going wrong
+Biggest risk
+Most important thing to monitor
+
+The user should finish reading this and feel:
+
+"I now understand Reliance."
+
+--------------------------------------------------
+
+WRITING STYLE
+
+This is extremely important.
+
+Write like a smart investor explaining a company to another smart person.
+
+NOT like:
+
+A CFA textbook
+An equity research report
+A financial newspaper
+A corporate presentation
+
+Use simple English.
+
+Instead of:
+
+"Working capital intensity deteriorated materially"
+
+Say:
+
+"More money is getting stuck in the business."
+
+Instead of:
+
+"Operating leverage compressed"
+
+Say:
+
+"Costs increased faster than sales, so profit margins came under pressure."
+
+Instead of:
+
+"Accrual quality deteriorated"
+
+Say:
+
+"Reported profit increased, but much less of that profit turned into cash."
+
+Keep explanations short and clear.
+
+Use:
+
+"What happened?"
+"Why?"
+"Why does it matter?"
+
+throughout the website.
+
+--------------------------------------------------
+
+DESIGN
+
+Very clean.
+
+White/light background.
+
+Black/dark text.
+
+Minimal accent colour.
+
+Lots of whitespace.
+
+Large readable text.
+
+No charts.
+
+No stock trading terminal design.
+
+No complicated dashboards.
+
+No unnecessary icons.
+
+No excessive animations.
+
+No financial widgets.
+
+The page should feel like reading a very well-written research article.
+
+Make important conclusions visually clear using small labels such as:
+
+GOOD
+WATCH
+RED FLAG
+
+But do not make the website look like a trading app.
+
+--------------------------------------------------
+
+IMPORTANT FUTURE ARCHITECTURE
+
+For now use SAMPLE DATA ONLY.
+
+Do NOT connect OpenAI.
+Do NOT connect financial APIs.
+Do NOT connect news APIs.
+Do NOT connect Supabase yet.
+
+However, structure the code so that later we can connect:
+
+1. Company financial data
+2. Annual reports
+3. Quarterly results
+4. Investor presentations
+5. Concall transcripts
+6. Shareholding data
+7. News
+8. Stock price data
+
+Later an AI research engine will analyze this information and automatically generate the explanations.
+
+The final future workflow will be:
+
+USER SEARCHES COMPANY
+
+↓
+
+DATABASE RETRIEVES COMPANY DATA
+
+↓
+
+AI ANALYZES THE INFORMATION
+
+↓
+
+AI CONNECTS P&L + BALANCE SHEET + CASH FLOW + NEWS + MANAGEMENT COMMENTARY
+
+↓
+
+AI FINDS WHAT HAPPENED
+
+↓
+
+AI EXPLAINS WHY IT HAPPENED
+
+↓
+
+AI EXPLAINS WHY IT MATTERS
+
+↓
+
+AI IDENTIFIES POTENTIAL RED FLAGS
+
+↓
+
+WEBSITE SHOWS SIMPLE RESEARCH
+
+For now, only build the beautiful frontend prototype using realistic sample Reliance information.
+
+Make the Reliance page the main focus.
+
+Do not add unnecessary features.
+
+The most important goal is:
+
+WHEN SOMEONE SEARCHES RELIANCE, THEY SHOULD FEEL:
+
+"FINALLY, SOMEONE EXPLAINED THIS COMPANY TO ME IN SIMPLE LANGUAGE."
+
+Build the working website now.

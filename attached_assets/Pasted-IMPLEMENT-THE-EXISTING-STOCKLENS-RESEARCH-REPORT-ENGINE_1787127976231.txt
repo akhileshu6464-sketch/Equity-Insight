@@ -1,0 +1,384 @@
+IMPLEMENT THE EXISTING STOCKLENS RESEARCH REPORT ENGINE NOW.
+
+IMPORTANT:
+We already have the research blueprint, checklists, accounting-basis
+rules, evidence/retrieval system, and Reliance FY2025-26 Annual Report
+successfully ingested.
+
+DO NOT rebuild or replace existing working infrastructure.
+
+DO NOT modify:
+- PDF ingestion
+- document extraction
+- document_chunks
+- Supabase schema
+- RPT checklist
+- accounting-basis framework
+- existing retrieval system
+- existing UI design unless required to display the report
+- GitHub integration
+
+Use the existing framework and data.
+
+==================================================
+PRIMARY OBJECTIVE
+==================================================
+
+Take the existing Reliance Industries FY2025-26 Annual Report data and
+generate a COMPLETE investor-facing equity research report.
+
+This is NOT a 5-minute short report.
+
+The report should be comprehensive enough to replace the investor's
+need to read the annual report for an initial understanding of the
+company.
+
+The "5-minute" concept means the investor can understand the company
+quickly through a structured report. It does NOT mean the report itself
+should be short.
+
+==================================================
+REPORT SECTIONS
+==================================================
+
+Generate these sections where sufficient evidence exists:
+
+1. EXECUTIVE SUMMARY
+2. BUSINESS & BUSINESS MODEL
+3. INDUSTRY / BUSINESS ENVIRONMENT
+4. 5-YEAR FINANCIAL PERFORMANCE
+5. QUARTERLY PERFORMANCE if data exists
+6. PROFITABILITY & KEY RATIOS
+7. CASH FLOW ANALYSIS
+8. BALANCE SHEET
+9. WORKING CAPITAL
+   - receivables
+   - inventory
+   - payables
+   - working-capital days
+10. DEBT & LIQUIDITY
+11. SEGMENT ANALYSIS
+12. MANAGEMENT STRATEGY
+13. MANAGEMENT GUIDANCE / OUTLOOK
+14. GUIDANCE VS ACTUAL EXECUTION where evidence exists
+15. CAPITAL ALLOCATION
+16. RELATED PARTY TRANSACTIONS
+17. AUDITOR REPORT ANALYSIS
+18. SHAREHOLDING & GOVERNANCE
+19. SUBSIDIARIES / JOINT VENTURES
+20. RISKS & RED FLAGS
+21. POSITIVE DEVELOPMENTS / CATALYSTS
+22. INVESTOR MONITORING POINTS
+23. FINAL INVESTOR TAKEAWAY
+
+Do not create empty sections just to fill the page.
+
+If sufficient evidence is unavailable, clearly state:
+"Insufficient evidence in the available source."
+
+==================================================
+FINANCIAL ANALYSIS
+==================================================
+
+Do NOT simply copy financial statements.
+
+Calculate and interpret relevant metrics such as:
+
+- revenue growth
+- EBITDA growth
+- EBITDA margin
+- PAT growth
+- EPS
+- ROE
+- ROCE
+- ROIC where appropriate
+- asset turnover where appropriate
+- CFO
+- CFO/PAT
+- capex
+- free cash flow where calculable
+- debt
+- net debt where calculable
+- debt growth
+- receivable days
+- inventory days
+- payable days
+- working-capital days
+
+Use deterministic calculations wherever possible.
+
+Do not ask the AI to calculate simple arithmetic if code can calculate it.
+
+AI should primarily interpret the calculated results.
+
+==================================================
+CONSOLIDATED VS STANDALONE — CRITICAL
+==================================================
+
+Never mix consolidated and standalone figures.
+
+For every financial metric internally determine:
+
+CONSOLIDATED
+STANDALONE
+NOT DETERMINED
+
+Prefer consolidated information for group-level business analysis
+where appropriate.
+
+Use standalone where the analytical question specifically requires
+the parent-company basis.
+
+If both are available and materially different, do not silently
+choose one.
+
+If accounting basis cannot be established, do not guess.
+
+The same rule applies to PEERS later.
+
+Never compare a company's consolidated figure against another company's
+standalone figure.
+
+==================================================
+INDUSTRY-SPECIFIC ANALYSIS
+==================================================
+
+Do not blindly apply every ratio to every company.
+
+Determine the company's industry/business model and select relevant
+metrics.
+
+Examples:
+
+Manufacturing / capital intensive:
+- EV/EBITDA
+- ROCE
+- asset turnover
+- margins
+- capacity/utilisation where available
+
+Banks/NBFCs/financial services:
+- P/B
+- ROE
+- NIM
+- GNPA
+- NNPA
+- capital adequacy where available
+
+Asset-light / consumer / IT / pharma:
+- P/E
+- PEG where appropriate
+- ROE/ROIC
+- working capital
+- cash conversion
+
+Use genuine analyst judgement rather than mechanically applying a
+checklist.
+
+==================================================
+RPT ANALYSIS
+==================================================
+
+Use the existing RPT checklist.
+
+Analyze:
+
+- materiality
+- pricing
+- independent valuation
+- markups/discounts
+- royalties
+- management fees
+- shared expenses
+- loans/advances
+- interest rates
+- guarantees
+- pledged assets
+- related receivables
+- round-tripping indicators
+- promoter-controlled distributors
+- commercial rationale
+- operating reality of related entities
+- IP ownership
+- minority shareholder approval
+- undisclosed relationships
+- repeated RPT limit increases
+
+Do not label an RPT as a red flag merely because it exists.
+
+Explain why it is or is not concerning based on evidence.
+
+==================================================
+AUDITOR ANALYSIS
+==================================================
+
+Analyze the auditor report rather than copying it.
+
+Check:
+
+- audit opinion
+- qualifications
+- emphasis of matter
+- key audit matters
+- internal control observations
+- accounting concerns
+- going concern issues
+- auditor changes where disclosed
+
+Explain the investor implication.
+
+==================================================
+MANAGEMENT ANALYSIS
+==================================================
+
+Separate:
+
+FACT:
+what management actually stated.
+
+ANALYST INTERPRETATION:
+what the statement could imply based on evidence.
+
+Do not treat management guidance as guaranteed future performance.
+
+Where historical guidance and actual results can be compared,
+identify execution quality.
+
+==================================================
+RED FLAGS
+==================================================
+
+Only identify evidence-backed risks.
+
+Do not manufacture risks.
+
+For every important risk:
+
+What happened
+→ Why it matters
+→ Severity / significance
+→ Evidence available
+
+==================================================
+USER-FACING OUTPUT
+==================================================
+
+The investor should NOT see:
+
+- chunk IDs
+- chunk numbers
+- retrieval IDs
+- internal evidence IDs
+- raw database identifiers
+- internal confidence labels
+- internal FACT/INFERENCE tags
+- page numbers
+- internal retrieval metadata
+
+Keep those internally for auditability.
+
+The normal result page should contain ONLY clean professional
+equity-research writing.
+
+Do not display the research questions/checklists.
+
+Do not make the report look like an AI debugging screen.
+
+==================================================
+WRITING STYLE
+==================================================
+
+Write like a professional equity research analyst.
+
+Be:
+
+- analytical
+- specific
+- concise where possible
+- evidence-based
+- investor-oriented
+- logical
+
+Do NOT produce:
+
+- generic AI statements
+- repetitive explanations
+- filler
+- unnecessary disclaimers
+- long descriptions of what the annual report says
+- unsupported conclusions
+
+The report should explain:
+
+WHAT happened
+WHY it happened
+WHY it matters
+WHAT investors should watch
+
+==================================================
+EVIDENCE
+==================================================
+
+Use the existing evidence system internally.
+
+Every material conclusion must be traceable internally to source
+evidence.
+
+Do not invent information.
+
+If evidence conflicts:
+identify the conflict and resolve it only when the source supports
+the resolution.
+
+If it cannot be resolved:
+state that the evidence is inconclusive.
+
+==================================================
+PERFORMANCE / COST
+==================================================
+
+IMPORTANT:
+
+Do NOT repeatedly send the entire annual report to the AI.
+
+Retrieve only relevant chunks for each analysis section.
+
+Avoid duplicate AI calls.
+
+Reuse already retrieved evidence where possible.
+
+Do not regenerate an analysis section unnecessarily.
+
+Cache/store completed analysis where the existing architecture
+supports it.
+
+The objective is to make this scalable to thousands of companies.
+
+==================================================
+TEST
+==================================================
+
+Use ONLY the existing Reliance Industries FY2025-26 Annual Report.
+
+Do not add external data.
+
+Generate the report.
+
+Run existing TypeScript checks.
+
+Do not create a database migration unless absolutely required.
+
+If a migration is required, STOP and tell me before running it.
+
+At completion, report:
+
+1. Files changed
+2. AI calls made
+3. Whether existing database schema was changed
+4. Whether TypeScript checks passed
+5. Whether the complete Reliance research report was generated
+6. Any sections where evidence was insufficient
+
+Do not start another company.
+Do not add new data sources.
+STOP after this implementation.
